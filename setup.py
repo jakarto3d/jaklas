@@ -13,14 +13,14 @@ with open('requirements.txt') as requirements_file:
 
 
 setup(
-    name='laswriter',
+    name='las_writer',
     version='0.0.1',
     description="Point cloud writer to las file.",
     long_description=readme,
     author="Arnaud Venet",
     author_email='arnaud.venet@jakarto.com',
-    url='https://github.com/jakarto3d/laswriter',
-    packages=find_packages(include=['laswriter*']),
+    url='https://github.com/jakarto3d/las_writer',
+    packages=find_packages(include=['las_writer*']),
     include_package_data=True,
     install_requires=requirements,
     license="Jakarto Licence",
