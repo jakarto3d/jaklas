@@ -186,29 +186,3 @@ class JakartoLasFile(object):
         self.output_file.close()
         self.template_file.close()
 
-def pandas2las(dataframe,output_filename):
-    ## Save a pandas dataframe to a las file
-    ## Input :
-    # dataframe -> pandas dataframe indexed by gps_time with ['X', 'Y', 'Z', 'intensity', 'gps_time', 'x_lidar','y_lidar','z_lidar','x_gps','y_gps','z_gps','heading_imu','roll_imu','pitch_imu'] columns
-    # output_filename -> string output filename
-
-    dfsave = dataframe.drop(columns = ['x_lidar','y_lidar','z_lidar','x_gps','y_gps','z_gps','heading_imu','roll_imu','pitch_imu'])
-    dfsave = dfsave.rename(columns={
-            'X': 'x_lidar',
-            'Y': 'y_lidar',
-            'Z': 'z_lidar'
-        }, copy=False)
-    ptCloud = dfsave
-    las_header_offset_scale_definer = JakartoLasHeaderOffsetScaleDefiner(ptCloud)
-    export_lidar_points = las_header_offset_scale_definer.vectorized_get_coordinates_to_save_in_las(ptCloud)
-    export_lidar_points.drop(columns=['x_lidar', 'y_lidar', 'z_lidar'], inplace=True)
-    export_lidar_points = export_lidar_points.rename(columns={
-        'new_x': 'x_lidar',
-        'new_y': 'y_lidar',
-        'new_z': 'z_lidar'
-    }, copy=False)
-    export_lidar_points = export_lidar_points.rename(columns={"x_lidar": "X", "y_lidar": "Y", "z_lidar": "Z"})
-    
-    output_file = JakartoLasFile(output_filename, las_header_offset_scale_definer)
-    # writing and closing las file
-    output_file.write_and_close(export_lidar_points)
