@@ -37,5 +37,5 @@ data = {'gps_time': [0, 1.232, 2.543, 3.741],
         }
 dataframe = pandas.DataFrame(data)
 filename = 'exemple.las'
-las_writer.pandas2las(dataframe, filename)
+las_writer.pandas2las.pandas2las(dataframe, filename)
 ```
