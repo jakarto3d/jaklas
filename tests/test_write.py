@@ -40,6 +40,9 @@ point_data_gps_time_color = {
 }
 
 point_data_pandas = pd.DataFrame(point_data)
+point_data_color_pandas = pd.DataFrame(point_data_color)
+point_data_gps_time_pandas = pd.DataFrame(point_data_gps_time)
+point_data_gps_time_color_pandas = pd.DataFrame(point_data_gps_time_color)
 
 
 TEMP_OUTPUT = DATA_DIR / "temp.las"
@@ -61,6 +64,10 @@ def test_write(point_data):
         (point_data_gps_time, 1),
         (point_data_color, 2),
         (point_data_gps_time_color, 3),
+        (point_data_pandas, 0),
+        (point_data_gps_time_pandas, 1),
+        (point_data_color_pandas, 2),
+        (point_data_gps_time_color_pandas, 3),
     ],
 )
 def test_write_point_format(data, point_format):
