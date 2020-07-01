@@ -68,6 +68,9 @@ def write(
         if "gps_time" in point_format_type and "gps_time" in point_data:
             f.gps_time = point_data["gps_time"]
 
+        if "intensity" in point_format_type and "intensity" in point_data:
+            f.intensity = point_data["intensity"]
+
         colors = ["red", "green", "blue"]
         if all(c in point_format_type and c in point_data for c in colors):
             f.red = point_data["red"]

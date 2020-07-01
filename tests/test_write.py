@@ -12,6 +12,7 @@ DATA_DIR = Path(__file__).parent / "data"
 
 
 xyz = np.random.random((100, 3)) * 100
+intensity = np.random.random(100) * 100
 gps_time = np.random.random(100) * 100
 rgb = np.random.random((100, 3)) * 100
 
@@ -19,6 +20,7 @@ point_data = {
     "x": xyz[:, 0],
     "y": xyz[:, 1],
     "z": xyz[:, 2],
+    "intensity": intensity,
 }
 
 point_data_color = {
@@ -55,6 +57,7 @@ def test_write_simple(data):
         assert np.allclose(f.x, data["x"], atol=0.0001)
         assert np.allclose(f.y, data["y"], atol=0.0001)
         assert np.allclose(f.z, data["z"], atol=0.0001)
+        assert np.allclose(f.intensity, data["intensity"].astype('u2'), atol=0.0001)
 
 
 @pytest.mark.parametrize("data", [point_data_gps_time, point_data_gps_time_pandas])
