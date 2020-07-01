@@ -117,3 +117,18 @@ def test_write_large_classifications():
         assert np.allclose(f.intensity, data["intensity"].astype("u2"))
         assert np.allclose(f.classification, data["classification"])
 
+
+def test_write_scaled():
+    data = point_data_color
+    data_min_max = {
+        "intensity": (0, 255),
+        "red": (0, 255),
+        "green": (0, 255),
+        "blue": (0, 255),
+    }
+    las_writer.write(data, TEMP_OUTPUT, data_min_max=data_min_max)
+    with laspy.file.File(TEMP_OUTPUT) as f:
+        assert np.allclose(f.intensity, (data["intensity"] * 2 ** 8).astype("u2"))
+        assert np.allclose(f.red, (data["red"] * 2 ** 8).astype("u2"))
+        assert np.allclose(f.green, (data["green"] * 2 ** 8).astype("u2"))
+        assert np.allclose(f.blue, (data["blue"] * 2 ** 8).astype("u2"))

@@ -1,8 +1,8 @@
 from pathlib import Path
-from typing import Union, Tuple
+from typing import Dict, Optional, Tuple, Union
 
-import numpy as np
 import laspy
+import numpy as np
 
 from . import point_formats
 
@@ -10,17 +10,12 @@ from . import point_formats
 def write(
     point_data,
     output_path: Union[Path, str],
+    *,
     point_format: int = None,
     precision: Tuple[float] = (0.0001, 0.0001, 0.0001),
+    data_min_max: Optional[Dict[str, Tuple]] = None,
 ):
     """Write point cloud data to an output path.
-
-    The data is not scaled in any way.
-
-    For example: the red channel is stored as uint16 inside a las file.
-    If the red data in the source point_data is uint8, it will be casted as-is to
-    uint16. So a value of 25 in the red channel in uint8 will be converted to 25 in
-    uint16, which is twice as dark.
 
     Look in point_formats.py to see the type of each destination field.
 
@@ -42,8 +37,17 @@ def write(
             Setting this to a number too small could lead to errors when using
             large coordinates.
             Defaults to (0.0001, 0.0001, 0.0001).
+        data_min_max (dict): Scale some dimensions according to these minimum and maximum
+            values. Only these fields can be scaled: intensity, red, green, blue
+            For example: the red channel is stored as uint16 inside a las file.
+            If the red data in the source point_data is uint8, you can set
+            data_min_max = {'red': (0, 255)}
+            and the data will be scaled to the uint16 range 0-65536.
     """
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+
+    if data_min_max is None:
+        data_min_max = {}
 
     if not point_format:
         point_format = point_formats.best_point_format(point_data)
@@ -79,13 +83,29 @@ def write(
             f.gps_time = point_data["gps_time"]
 
         if "intensity" in point_format_type and "intensity" in point_data:
-            f.intensity = point_data["intensity"]
+            f.intensity = scale_data(
+                "intensity", point_data["intensity"], data_min_max.get("intensity")
+            )
 
         if "classification" in point_format_type and "classification" in point_data:
             f.classification = point_data["classification"]
 
         colors = ["red", "green", "blue"]
         if all(c in point_format_type and c in point_data for c in colors):
-            f.red = point_data["red"]
-            f.green = point_data["green"]
-            f.blue = point_data["blue"]
+            for c in colors:
+                setattr(f, c, scale_data(c, point_data[c], data_min_max.get(c)))
+
+
+def scale_data(field_name, data, min_max):
+    if min_max is None:
+        return data
+
+    dtype = point_formats.point_formats[3][field_name]
+
+    max_value = 2 ** (np.dtype(dtype).itemsize * 8)
+
+    offset = min_max[0] or 0
+    scale = max_value / (min_max[1] - min_max[0] + 1)
+
+    return (data - offset) * scale
+
