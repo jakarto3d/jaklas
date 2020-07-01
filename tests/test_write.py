@@ -71,9 +71,9 @@ def test_write_gps_time(data):
 def test_write_color(data):
     las_writer.write(data, TEMP_OUTPUT)
     with laspy.file.File(TEMP_OUTPUT) as f:
-        assert np.allclose(f.red, data["red"], atol=0.0001)
-        assert np.allclose(f.green, data["green"], atol=0.0001)
-        assert np.allclose(f.blue, data["blue"], atol=0.0001)
+        assert np.allclose(f.red, data["red"].astype("u2"))
+        assert np.allclose(f.green, data["green"].astype("u2"))
+        assert np.allclose(f.blue, data["blue"].astype("u2"))
 
 
 @pytest.mark.parametrize(
