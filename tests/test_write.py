@@ -104,3 +104,16 @@ def test_write_color(data):
 )
 def test_write_point_format(data, point_format):
     assert las_writer.best_point_format(data) == point_format
+
+
+def test_write_large_classifications():
+    data = point_data_large_classification
+    las_writer.write(data, TEMP_OUTPUT)
+    with laspy.file.File(TEMP_OUTPUT) as f:
+        assert f.point_format.fmt == "6"
+        assert np.allclose(f.x, data["x"], atol=0.0001)
+        assert np.allclose(f.y, data["y"], atol=0.0001)
+        assert np.allclose(f.z, data["z"], atol=0.0001)
+        assert np.allclose(f.intensity, data["intensity"].astype("u2"))
+        assert np.allclose(f.classification, data["classification"])
+
