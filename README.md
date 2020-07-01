@@ -2,12 +2,13 @@
 
 las_writer est un repo permettant d'enregistrer des tableaux pandas en nuage de point au format .las
 
+(ou tout object qui implémente ``__getitem__``)
+
 ## Requirements
 ```bash
 numpy
 pandas
 laspy
-pathlib
 ```
 
 ## Installation
@@ -16,15 +17,28 @@ git clone git@github.com:jakarto3d/las_writer.git
 cd las_writer
 python -m pip install .
 ```
-Tester l'installation
-```python
-import las_writer
-las_writer.pandas2las.exemple()
+
+### Tester l'installation
+```bash
+pip install -r requirements-dev.txt
+pytest
 ```
 
 ## Utilisation
-La fonction pandas2las convertit un pandas dataframe en fichier las. 
-Le dataframe doit avoir les champs 'gps_time', 'intensity', 'X', 'Y', 'Z'.
+La fonction ``las_writer.write`` convertit un pandas dataframe en fichier las. 
+Le dataframe **doit** avoir les champs:
+ - x (ou X)
+ - y (ou Y)
+ - z (ou Z)
+et il peut avoir les champs:
+ - gps_time
+ - intensity
+ - classification
+ - red
+ - green
+ - blue
+ - tout autre champs persionnalisé
+
 Voir l'exemple :
 ```python
 import las_writer
@@ -37,5 +51,11 @@ data = {'gps_time': [0, 1.232, 2.543, 3.741],
         }
 dataframe = pandas.DataFrame(data)
 filename = 'exemple.las'
-las_writer.pandas2las.pandas2las(dataframe, filename)
+las_writer.write(dataframe, filename)
 ```
+
+Voir les paramètres de la fonction ``las_writer.write`` pour plus de fonctionnalités:
+
+ - gestion automatique du format de points dans le fichier las de sortie
+ - précision (scale) du fichier las est optionnel, par défaut à (0.0001, 0.0001, 0.0001)
+ - data_min_max est utilisé pour mettres à l'échelle les données en fonction du format des champs
