@@ -13,6 +13,8 @@ DATA_DIR = Path(__file__).parent / "data"
 
 xyz = np.random.random((100, 3)) * 100
 intensity = np.random.random(100) * 100
+classification = (np.random.random(100) * 31).astype("u1")
+classification_large = (np.random.random(100) * 255).astype("u1")
 gps_time = np.random.random(100) * 100
 rgb = np.random.random((100, 3)) * 100
 
@@ -21,6 +23,15 @@ point_data = {
     "y": xyz[:, 1],
     "z": xyz[:, 2],
     "intensity": intensity,
+    "classification": classification,
+}
+
+point_data_large_classification = {
+    "x": xyz[:, 0],
+    "y": xyz[:, 1],
+    "z": xyz[:, 2],
+    "intensity": intensity,
+    "classification": classification_large,
 }
 
 point_data_color = {
@@ -57,7 +68,8 @@ def test_write_simple(data):
         assert np.allclose(f.x, data["x"], atol=0.0001)
         assert np.allclose(f.y, data["y"], atol=0.0001)
         assert np.allclose(f.z, data["z"], atol=0.0001)
-        assert np.allclose(f.intensity, data["intensity"].astype('u2'), atol=0.0001)
+        assert np.allclose(f.intensity, data["intensity"].astype("u2"))
+        assert np.allclose(f.classification, data["classification"])
 
 
 @pytest.mark.parametrize("data", [point_data_gps_time, point_data_gps_time_pandas])
@@ -83,6 +95,7 @@ def test_write_color(data):
         (point_data_gps_time, 1),
         (point_data_color, 2),
         (point_data_gps_time_color, 3),
+        (point_data_large_classification, 6),
         (point_data_pandas, 0),
         (point_data_gps_time_pandas, 1),
         (point_data_color_pandas, 2),

@@ -30,8 +30,9 @@ def write(
             all work.
         output_path (Union[Path, str]): The output path to write the las file.
             The output directory is created if it doesn't exist.
-        point_format (int, optional): The las point format type (only formats 0 to 3
-            are accepted). If None is given, the best point format will be guessed
+        point_format (int, optional): The las point format type identifier 
+            Only formats 0, 1, 2, 3, 6 and 7 are accepted.
+            If None is given, the best point format will be guessed
             based on the provided fields.
         precision (Tuple[float], optional): The coordinate precision.
             Coordinates in the las file are stored in int32. This means that there is
@@ -46,6 +47,12 @@ def write(
 
     if not point_format:
         point_format = point_formats.best_point_format(point_data)
+
+    if point_format not in point_formats.supported_point_formats:
+        raise ValueError(
+            f"Unsupported point format {point_format} "
+            f"(not in {point_formats.supported_point_formats})"
+        )
 
     point_format_type = point_formats.point_formats[point_format]
 
@@ -70,6 +77,9 @@ def write(
 
         if "intensity" in point_format_type and "intensity" in point_data:
             f.intensity = point_data["intensity"]
+
+        if "classification" in point_format_type and "classification" in point_data:
+            f.classification = point_data["classification"]
 
         colors = ["red", "green", "blue"]
         if all(c in point_format_type and c in point_data for c in colors):
