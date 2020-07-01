@@ -58,4 +58,4 @@ Voir les paramètres de la fonction ``las_writer.write`` pour plus de fonctionna
 
  - gestion automatique du format de points dans le fichier las de sortie
  - précision (scale) du fichier las est optionnel, par défaut à (0.0001, 0.0001, 0.0001)
- - data_min_max est utilisé pour mettres à l'échelle les données en fonction du format des champs
+ - data_min_max est utilisé pour mettre à l'échelle les données en fonction du format des champs
