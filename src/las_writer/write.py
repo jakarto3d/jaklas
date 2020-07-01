@@ -56,21 +56,24 @@ def write(
 
     point_format_type = point_formats.point_formats[point_format]
 
+    for coords in ["xyz", "XYZ"]:
+        if all(c in point_data for c in coords):
+            xyz = [point_data[c] for c in coords]
+            break
+    else:
+        raise ValueError("Could not find xyz coordinates from input data.")
+
     with laspy.file.File(
         str(output_path),
         mode="w",
         header=laspy.header.Header(point_format=point_format),
     ) as f:
-        f.header.offset = [
-            np.min(point_data["x"]),
-            np.min(point_data["y"]),
-            np.min(point_data["z"]),
-        ]
+        f.header.offset = list(map(np.min, xyz))
         f.header.scale = precision
 
-        f.x = point_data["x"]
-        f.y = point_data["y"]
-        f.z = point_data["z"]
+        f.x = xyz[0]
+        f.y = xyz[1]
+        f.z = xyz[2]
 
         if "gps_time" in point_format_type and "gps_time" in point_data:
             f.gps_time = point_data["gps_time"]
