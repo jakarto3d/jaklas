@@ -15,6 +15,15 @@ def write(
 ):
     """Write point cloud data to an output path.
 
+    The data is not scaled in any way.
+
+    For example: the red channel is stored as uint16 inside a las file.
+    If the red data in the source point_data is uint8, it will be casted as-is to
+    uint16. So a value of 25 in the red channel in uint8 will be converted to 25 in
+    uint16, which is twice as dark.
+
+    Look in point_formats.py to see the type of each destination field.
+
     Args:
         point_data (dict-like): Any object that implements the __getitem__ method.
             So a dictionnary, a pandas DataFrame, or a numpy structured array will
@@ -38,6 +47,8 @@ def write(
     if not point_format:
         point_format = point_formats.best_point_format(point_data)
 
+    point_format_type = point_formats.point_formats[point_format]
+
     with laspy.file.File(
         str(output_path),
         mode="w",
@@ -53,3 +64,12 @@ def write(
         f.x = point_data["x"]
         f.y = point_data["y"]
         f.z = point_data["z"]
+
+        if "gps_time" in point_format_type and "gps_time" in point_data:
+            f.gps_time = point_data["gps_time"]
+
+        colors = ["red", "green", "blue"]
+        if all(c in point_format_type and c in point_data for c in colors):
+            f.red = point_data["red"]
+            f.green = point_data["green"]
+            f.blue = point_data["blue"]

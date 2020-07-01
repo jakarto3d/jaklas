@@ -48,13 +48,29 @@ point_data_gps_time_color_pandas = pd.DataFrame(point_data_gps_time_color)
 TEMP_OUTPUT = DATA_DIR / "temp.las"
 
 
-@pytest.mark.parametrize("point_data", [point_data, point_data_pandas])
-def test_write(point_data):
-    las_writer.write(point_data, TEMP_OUTPUT)
+@pytest.mark.parametrize("data", [point_data, point_data_pandas])
+def test_write_simple(data):
+    las_writer.write(data, TEMP_OUTPUT)
     with laspy.file.File(TEMP_OUTPUT) as f:
-        assert np.allclose(f.x, point_data["x"], atol=0.0001)
-        assert np.allclose(f.y, point_data["y"], atol=0.0001)
-        assert np.allclose(f.z, point_data["z"], atol=0.0001)
+        assert np.allclose(f.x, data["x"], atol=0.0001)
+        assert np.allclose(f.y, data["y"], atol=0.0001)
+        assert np.allclose(f.z, data["z"], atol=0.0001)
+
+
+@pytest.mark.parametrize("data", [point_data_gps_time, point_data_gps_time_pandas])
+def test_write_gps_time(data):
+    las_writer.write(data, TEMP_OUTPUT)
+    with laspy.file.File(TEMP_OUTPUT) as f:
+        assert np.allclose(f.gps_time, data["gps_time"], atol=0.0001)
+
+
+@pytest.mark.parametrize("data", [point_data_color, point_data_color_pandas])
+def test_write_color(data):
+    las_writer.write(data, TEMP_OUTPUT)
+    with laspy.file.File(TEMP_OUTPUT) as f:
+        assert np.allclose(f.red, data["red"], atol=0.0001)
+        assert np.allclose(f.green, data["green"], atol=0.0001)
+        assert np.allclose(f.blue, data["blue"], atol=0.0001)
 
 
 @pytest.mark.parametrize(
