@@ -132,3 +132,12 @@ def test_write_scaled():
         assert np.allclose(f.red, (data["red"] * 2 ** 8).astype("u2"))
         assert np.allclose(f.green, (data["green"] * 2 ** 8).astype("u2"))
         assert np.allclose(f.blue, (data["blue"] * 2 ** 8).astype("u2"))
+
+
+@pytest.mark.parametrize("data", [point_data, point_data_pandas])
+def test_write_extra_dimensions(data):
+    data["new_stuff"] = (np.random.random(100) * 100).astype("u1")
+    las_writer.write(data, TEMP_OUTPUT)
+    with laspy.file.File(TEMP_OUTPUT) as f:
+        assert np.allclose(f.new_stuff, data["new_stuff"])
+        assert f.new_stuff.dtype == np.dtype("u1")

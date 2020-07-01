@@ -27,6 +27,38 @@ point_formats = {
 
 supported_point_formats = list(point_formats)
 
+# everything that is not an extra dimension
+standard_dimensions = {
+    "x",
+    "y",
+    "z",
+    "X",
+    "Y",
+    "Z",
+    "intensity",
+    "gps_time",
+    "classification",
+    "red",
+    "green",
+    "blue",
+    "flag_byte",
+    "classification_flags",
+    "classification_byte",
+    "raw_classification",
+    "scan_angle_rank",
+    "scan_angle",
+    "user_data",
+    "pt_src_id",
+    "nir",
+    "wave_packet_desc_index",
+    "byte_offset_to_waveform_data",
+    "waveform_packet_size",
+    "return_point_waveform_loc",
+    "x_t",
+    "y_t",
+    "z_t",
+}
+
 
 def best_point_format(data) -> int:
     """Returns the best point format depending on keys in the provided object.

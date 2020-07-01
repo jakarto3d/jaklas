@@ -1,4 +1,5 @@
 from pathlib import Path
+import types
 from typing import Dict, Optional, Tuple, Union
 
 import laspy
@@ -58,6 +59,8 @@ def write(
             f"(not in {point_formats.supported_point_formats})"
         )
 
+    extra_dimensions = sorted(set(point_data) - point_formats.standard_dimensions)
+
     point_format_type = point_formats.point_formats[point_format]
 
     for coords in ["xyz", "XYZ"]:
@@ -67,11 +70,23 @@ def write(
     else:
         raise ValueError("Could not find xyz coordinates from input data.")
 
-    with laspy.file.File(
-        str(output_path),
-        mode="w",
-        header=laspy.header.Header(point_format=point_format),
-    ) as f:
+    header = laspy.header.Header(file_version=1.4, point_format=point_format)
+
+    with laspy.file.File(str(output_path), mode="w", header=header) as f:
+        old_set_header_property = f.writer.set_header_property
+
+        def monkeypatched(self, *args, **kwargs):
+            """There is a bug in laspy where Writer.data_provider._mmap
+
+            is not flushed before reading directly from the fileref."""
+            old_set_header_property(*args, **kwargs)
+            self.data_provider._mmap.flush()
+
+        f.writer.set_header_property = types.MethodType(monkeypatched, f.writer)
+
+        for dim in extra_dimensions:
+            f.define_new_dimension(dim, _guess_las_data_type(point_data[dim]), dim)
+
         f.header.offset = list(map(np.min, xyz))
         f.header.scale = precision
 
@@ -95,8 +110,15 @@ def write(
             for c in colors:
                 setattr(f, c, scale_data(c, point_data[c], data_min_max.get(c)))
 
+        for dim in extra_dimensions:
+            setattr(f, dim, point_data[dim])
+
+        f.header.update_min_max()
+
 
 def scale_data(field_name, data, min_max):
+    """Scale data using the min_max bounds and the destination data type"""
+
     if min_max is None:
         return data
 
@@ -109,3 +131,28 @@ def scale_data(field_name, data, min_max):
 
     return (data - offset) * scale
 
+
+def _guess_las_data_type(data):
+    """For a given array, return its laspy data type"""
+
+    default = "float64"
+    las_data_types = [
+        "uint8",
+        "int8",
+        "uint16",
+        "int16",
+        "uint32",
+        "int32",
+        "uint64",
+        "int64",
+        "float32",
+        "float64",
+    ]
+    try:
+        type_ = str(data.dtype)
+    except AttributeError:
+        type_ = default
+
+    if type_ not in las_data_types:
+        raise NotImplementedError("Array type not implemented: %s" % type_)
+    return las_data_types.index(type_) + 1
