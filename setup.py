@@ -22,7 +22,6 @@ setup(
     url='https://github.com/jakarto3d/las_writer',
     packages=['las_writer'],
     package_dir={'las_writer': 'src/las_writer'},
-    package_data={'las_writer': ['template.las']},
     python_requires='>=3.6',
     include_package_data=True,
     install_requires=requirements,
