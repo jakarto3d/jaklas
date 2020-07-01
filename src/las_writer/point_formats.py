@@ -21,7 +21,7 @@ point_formats = {
 }
 
 
-def guess_best_format(data) -> int:
+def best_point_format(data) -> int:
     """Returns the best point format depending on keys in the provided object.
 
     Args:
@@ -33,7 +33,7 @@ def guess_best_format(data) -> int:
         int: The best point format. If none is matched, return 0 as a default.
     """
     possible_formats = [
-        n for n, f in point_formats.items() if all(k in data for k in f)
+        n for n, f in point_formats.items() if all(k in f for k in data)
     ]
     if not possible_formats:
         return 0

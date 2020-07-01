@@ -34,9 +34,9 @@ def write(
             Defaults to (0.0001, 0.0001, 0.0001).
     """
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-    
+
     if not point_format:
-        point_format = point_formats.guess_best_format(point_data)
+        point_format = point_formats.best_point_format(point_data)
 
     with laspy.file.File(
         str(output_path),
