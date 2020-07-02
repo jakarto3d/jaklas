@@ -132,7 +132,7 @@ def test_write_scaled():
 
     las_writer.write(data, TEMP_OUTPUT, data_min_max=data_min_max)
     with laspy.file.File(TEMP_OUTPUT) as f:
-        assert np.allclose(f.intensity, (u1_to_u2(data["intensity"])).astype("u2"))
+        assert np.allclose(f.intensity, u1_to_u2(data["intensity"]).astype("u2"))
         assert np.allclose(f.red, u1_to_u2(data["red"]).astype("u2"))
         assert np.allclose(f.green, u1_to_u2(data["green"]).astype("u2"))
         assert np.allclose(f.blue, u1_to_u2(data["blue"]).astype("u2"))

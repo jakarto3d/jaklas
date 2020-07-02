@@ -125,10 +125,12 @@ def scale_data(field_name, data, min_max):
 
     dtype = point_formats.point_formats[3][field_name]
 
+    min_value = np.iinfo(np.dtype(dtype)).min
     max_value = np.iinfo(np.dtype(dtype)).max
 
-    offset = min_max[0] or 0
-    scale = max_value / (min_max[1] - min_max[0])
+    offset = (min_max[0] - min_value) or 0
+
+    scale = (max_value - min_value) / (min_max[1] - min_max[0])
 
     return (data - offset) * scale
 
