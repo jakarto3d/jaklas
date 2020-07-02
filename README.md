@@ -37,7 +37,7 @@ et il peut avoir les champs:
  - red
  - green
  - blue
- - tout autre champs persionnalisé
+ - tout autre champs personnalisé
 
 Voir l'exemple :
 ```python
