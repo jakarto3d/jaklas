@@ -1,9 +1,10 @@
 from pathlib import Path
 import types
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import laspy
 import numpy as np
+from numpy.ma.core import maximum
 
 from . import point_formats
 
@@ -13,7 +14,7 @@ def write(
     output_path: Union[Path, str],
     *,
     point_format: int = None,
-    precision: Tuple[float] = (0.0001, 0.0001, 0.0001),
+    scale: Tuple[float] = None,
     data_min_max: Optional[Dict[str, Tuple]] = None,
 ):
     """Write point cloud data to an output path.
@@ -30,14 +31,15 @@ def write(
             Only formats 0, 1, 2, 3, 6 and 7 are accepted.
             If None is given, the best point format will be guessed
             based on the provided fields.
-        precision (Tuple[float], optional): The coordinate precision.
+        scale (Tuple[float], optional): The coordinate precision.
             Coordinates in the las file are stored in int32. This means that there is
             always a slight loss in precision. Most real world use cases are not
             affected if the scale is set correctly. So this should be set to the
             smallest error you can afford to have in the final file.
             Setting this to a number too small could lead to errors when using
             large coordinates.
-            Defaults to (0.0001, 0.0001, 0.0001).
+            The default computes the scale based on the maximum range of a 32 bits 
+            signed integer.
         data_min_max (dict): Scale some dimensions according to these minimum and maximum
             values. Only these fields can be scaled: intensity, red, green, blue
             For example: the red channel is stored as uint16 inside a las file.
@@ -87,8 +89,9 @@ def write(
         for dim in extra_dimensions:
             f.define_new_dimension(dim, _guess_las_data_type(point_data[dim]), dim)
 
-        f.header.offset = list(map(np.min, xyz))
-        f.header.scale = precision
+        min_, max_, offset = _min_max_offset(xyz)
+        f.header.min, f.header.max, f.header.offset = min_, max_, offset
+        f.header.scale = scale if scale else _get_scale(xyz, min_, max_, offset)
 
         f.x = xyz[0]
         f.y = xyz[1]
@@ -113,8 +116,6 @@ def write(
         for dim in extra_dimensions:
             setattr(f, dim, point_data[dim])
 
-        f.header.update_min_max()
-
 
 def scale_data(field_name, data, min_max):
     """Scale data using the min_max bounds and the destination data type"""
@@ -130,6 +131,23 @@ def scale_data(field_name, data, min_max):
     scale = max_value / (min_max[1] - min_max[0])
 
     return (data - offset) * scale
+
+
+def _min_max_offset(xyz: List[np.ndarray]) -> Tuple[Tuple[float]]:
+    minimums = np.array(list(map(np.min, xyz)))
+    maximums = np.array(list(map(np.max, xyz)))
+    offset = np.mean([minimums, maximums], axis=0)
+    return minimums, maximums, offset
+
+
+def _get_scale(xyz: List[np.ndarray], minimums, maximums, offset) -> Tuple[float]:
+    max_long = np.iinfo(np.int32).max
+
+    offseted_max_ranges = np.max([np.abs(minimums) - offset, maximums - offset], axis=0)
+
+    scale = offseted_max_ranges / max_long
+
+    return tuple(scale)
 
 
 def _guess_las_data_type(data):
