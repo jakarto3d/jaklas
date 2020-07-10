@@ -61,15 +61,27 @@ def write(
             f"(not in {point_formats.supported_point_formats})"
         )
 
-    extra_dimensions = sorted(set(point_data) - point_formats.standard_dimensions)
+    standard_dimensions = point_formats.standard_dimensions | {"xyz", "XYZ"}
+
+    extra_dimensions = sorted(set(point_data) - standard_dimensions)
 
     point_format_type = point_formats.point_formats[point_format]
 
+    xyz = None
     for coords in ["xyz", "XYZ"]:
+        if coords in point_data:
+            # expects an array of the shape (n_points, 3)
+            xyz = [
+                point_data[coords][:, 0],
+                point_data[coords][:, 1],
+                point_data[coords][:, 2],
+            ]
+            break
         if all(c in point_data for c in coords):
             xyz = [point_data[c] for c in coords]
             break
-    else:
+
+    if not xyz:
         raise ValueError("Could not find xyz coordinates from input data.")
 
     header = laspy.header.Header(file_version=1.4, point_format=point_format)

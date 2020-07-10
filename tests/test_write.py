@@ -1,12 +1,12 @@
+from copy import deepcopy
 from pathlib import Path
-
 
 import laspy
 import numpy as np
-import pandas as pd
 import pytest
 
 import las_writer
+import pandas as pd
 
 DATA_DIR = Path(__file__).parent / "data"
 
@@ -68,6 +68,22 @@ def test_write_simple(data):
         assert np.allclose(f.x, data["x"], atol=0.0001)
         assert np.allclose(f.y, data["y"], atol=0.0001)
         assert np.allclose(f.z, data["z"], atol=0.0001)
+        assert np.allclose(f.intensity, data["intensity"].astype("u2"))
+        assert np.allclose(f.classification, data["classification"])
+
+
+@pytest.mark.parametrize("data", [point_data])
+def test_write_xyz(data):
+    data = deepcopy(data)
+    data["xyz"] = np.vstack([data["x"], data["y"], data["z"]]).T
+    del data["x"]
+    del data["y"]
+    del data["z"]
+    las_writer.write(data, TEMP_OUTPUT)
+    with laspy.file.File(TEMP_OUTPUT) as f:
+        assert np.allclose(f.x, data["xyz"][:, 0], atol=0.0001)
+        assert np.allclose(f.y, data["xyz"][:, 1], atol=0.0001)
+        assert np.allclose(f.z, data["xyz"][:, 2], atol=0.0001)
         assert np.allclose(f.intensity, data["intensity"].astype("u2"))
         assert np.allclose(f.classification, data["classification"])
 
