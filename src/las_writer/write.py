@@ -12,6 +12,7 @@ def write(
     point_data,
     output_path: Union[Path, str],
     *,
+    xyz_offset: Tuple[float] = (0, 0, 0),
     point_format: int = None,
     scale: Tuple[float] = None,
     data_min_max: Optional[Dict[str, Tuple]] = None,
@@ -26,6 +27,11 @@ def write(
             all work.
         output_path (Union[Path, str]): The output path to write the las file.
             The output directory is created if it doesn't exist.
+        xyz_offset (Tuple[float], optional): Apply this xyz offset before
+            writing the coordinates. This can be useful for large coordinates
+            loaded as float32 with an offset.
+            The offset is applied by substracting it from the coordinate.
+            Defaults to (0, 0, 0).
         point_format (int, optional): The las point format type identifier
             Only formats 0, 1, 2, 3, 6 and 7 are accepted.
             If None is given, the best point format will be guessed
@@ -101,12 +107,13 @@ def write(
             f.define_new_dimension(dim, _guess_las_data_type(point_data[dim]), dim)
 
         min_, max_, offset = _min_max_offset(xyz)
+        offset -= xyz_offset
         f.header.min, f.header.max, f.header.offset = min_, max_, offset
         f.header.scale = scale if scale else _get_scale(xyz, min_, max_, offset)
 
-        f.x = xyz[0]
-        f.y = xyz[1]
-        f.z = xyz[2]
+        f.x = xyz[0] - xyz_offset[0]
+        f.y = xyz[1] - xyz_offset[1]
+        f.z = xyz[2] - xyz_offset[2]
 
         if "gps_time" in point_format_type and "gps_time" in point_data:
             f.gps_time = point_data["gps_time"]

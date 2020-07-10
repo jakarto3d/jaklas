@@ -72,6 +72,18 @@ def test_write_simple(data):
         assert np.allclose(f.classification, data["classification"])
 
 
+@pytest.mark.parametrize("data", [point_data, point_data_pandas])
+def test_write_offset(data):
+    xyz_offset = (1, 2, 3)
+    las_writer.write(data, TEMP_OUTPUT, xyz_offset=xyz_offset)
+    with laspy.file.File(TEMP_OUTPUT) as f:
+        assert np.allclose(f.x, data["x"] - xyz_offset[0], atol=0.0001)
+        assert np.allclose(f.y, data["y"] - xyz_offset[1], atol=0.0001)
+        assert np.allclose(f.z, data["z"] - xyz_offset[2], atol=0.0001)
+        assert np.allclose(f.intensity, data["intensity"].astype("u2"))
+        assert np.allclose(f.classification, data["classification"])
+
+
 @pytest.mark.parametrize("data", [point_data])
 def test_write_xyz(data):
     data = deepcopy(data)
