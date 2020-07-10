@@ -4,7 +4,6 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import laspy
 import numpy as np
-from numpy.ma.core import maximum
 
 from . import point_formats
 
@@ -27,7 +26,7 @@ def write(
             all work.
         output_path (Union[Path, str]): The output path to write the las file.
             The output directory is created if it doesn't exist.
-        point_format (int, optional): The las point format type identifier 
+        point_format (int, optional): The las point format type identifier
             Only formats 0, 1, 2, 3, 6 and 7 are accepted.
             If None is given, the best point format will be guessed
             based on the provided fields.
@@ -38,11 +37,11 @@ def write(
             smallest error you can afford to have in the final file.
             Setting this to a number too small could lead to errors when using
             large coordinates.
-            The default computes the scale based on the maximum range of a 32 bits 
+            The default computes the scale based on the maximum range of a 32 bits
             signed integer.
-        data_min_max (dict): Scale some dimensions according to these minimum and maximum
-            values. Only these fields can be scaled: intensity, red, green, blue
-            For example: the red channel is stored as uint16 inside a las file.
+        data_min_max (dict): Scale some dimensions according to these minimum and
+            maximum values. Only these fields can be scaled: intensity, red, green,
+            blue For example: the red channel is stored as uint16 inside a las file.
             If the red data in the source point_data is uint8, you can set
             data_min_max = {'red': (0, 255)}
             and the data will be scaled to the uint16 range 0-65536.
