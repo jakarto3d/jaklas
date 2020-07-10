@@ -77,9 +77,25 @@ def test_write_offset(data):
     xyz_offset = (1, 2, 3)
     las_writer.write(data, TEMP_OUTPUT, xyz_offset=xyz_offset)
     with laspy.file.File(TEMP_OUTPUT) as f:
-        assert np.allclose(f.x, data["x"] - xyz_offset[0], atol=0.0001)
-        assert np.allclose(f.y, data["y"] - xyz_offset[1], atol=0.0001)
-        assert np.allclose(f.z, data["z"] - xyz_offset[2], atol=0.0001)
+        assert np.allclose(f.x, data["x"] + xyz_offset[0], atol=0.0001)
+        assert np.allclose(f.y, data["y"] + xyz_offset[1], atol=0.0001)
+        assert np.allclose(f.z, data["z"] + xyz_offset[2], atol=0.0001)
+        assert np.allclose(f.intensity, data["intensity"].astype("u2"))
+        assert np.allclose(f.classification, data["classification"])
+
+
+@pytest.mark.parametrize("data", [point_data, point_data_pandas])
+def test_write_offset_large_coordinates(data):
+    data = deepcopy(data)
+    xyz_offset = (3e5, 5e6, 100)
+    data["x"] = data["x"].astype("f")
+    data["y"] = data["y"].astype("f")
+    data["z"] = data["z"].astype("f")
+    las_writer.write(data, TEMP_OUTPUT, xyz_offset=xyz_offset)
+    with laspy.file.File(TEMP_OUTPUT) as f:
+        assert np.allclose(f.x, data["x"].astype("d") + xyz_offset[0], atol=0.0001)
+        assert np.allclose(f.y, data["y"].astype("d") + xyz_offset[1], atol=0.0001)
+        assert np.allclose(f.z, data["z"].astype("d") + xyz_offset[2], atol=0.0001)
         assert np.allclose(f.intensity, data["intensity"].astype("u2"))
         assert np.allclose(f.classification, data["classification"])
 

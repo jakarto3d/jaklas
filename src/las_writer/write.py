@@ -30,7 +30,7 @@ def write(
         xyz_offset (Tuple[float], optional): Apply this xyz offset before
             writing the coordinates. This can be useful for large coordinates
             loaded as float32 with an offset.
-            The offset is applied by substracting it from the coordinate.
+            The offset is applied by adding it to the coordinate.
             Defaults to (0, 0, 0).
         point_format (int, optional): The las point format type identifier
             Only formats 0, 1, 2, 3, 6 and 7 are accepted.
@@ -107,13 +107,15 @@ def write(
             f.define_new_dimension(dim, _guess_las_data_type(point_data[dim]), dim)
 
         min_, max_, offset = _min_max_offset(xyz)
-        offset -= xyz_offset
+        min_ += xyz_offset
+        max_ += xyz_offset
+        offset = xyz_offset if xyz_offset else offset
         f.header.min, f.header.max, f.header.offset = min_, max_, offset
-        f.header.scale = scale if scale else _get_scale(xyz, min_, max_, offset)
+        f.header.scale = scale if scale else _get_scale(min_, max_, offset)
 
-        f.x = xyz[0] - xyz_offset[0]
-        f.y = xyz[1] - xyz_offset[1]
-        f.z = xyz[2] - xyz_offset[2]
+        f.x = xyz[0].astype("d") + xyz_offset[0]
+        f.y = xyz[1].astype("d") + xyz_offset[1]
+        f.z = xyz[2].astype("d") + xyz_offset[2]
 
         if "gps_time" in point_format_type and "gps_time" in point_data:
             f.gps_time = point_data["gps_time"]
@@ -154,13 +156,13 @@ def scale_data(field_name, data, min_max):
 
 
 def _min_max_offset(xyz: List[np.ndarray]) -> Tuple[Tuple[float]]:
-    minimums = np.array(list(map(np.min, xyz)))
-    maximums = np.array(list(map(np.max, xyz)))
+    minimums = np.array(list(map(np.min, xyz)), "d")
+    maximums = np.array(list(map(np.max, xyz)), "d")
     offset = np.mean([minimums, maximums], axis=0)
     return minimums, maximums, offset
 
 
-def _get_scale(xyz: List[np.ndarray], minimums, maximums, offset) -> Tuple[float]:
+def _get_scale(minimums, maximums, offset) -> Tuple[float]:
     max_long = np.iinfo(np.int32).max
 
     offseted_max_ranges = np.max([np.abs(minimums) - offset, maximums - offset], axis=0)
