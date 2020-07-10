@@ -13,7 +13,7 @@ with open("requirements.txt") as requirements_file:
 
 setup(
     name="las_writer",
-    version="0.0.1",
+    version="0.1.0",
     description="Point cloud writer to las file.",
     long_description=readme,
     author="Arnaud Venet",
