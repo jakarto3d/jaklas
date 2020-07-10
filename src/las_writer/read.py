@@ -5,16 +5,23 @@ import numpy as np
 
 
 def read(
-    path, offset, *, combine_xyz=True, other_dims=["intensity", "gps_time"]
+    path,
+    offset,
+    *,
+    combine_xyz=True,
+    xyz_dtype=np.float64,
+    other_dims=["intensity", "gps_time"],
 ) -> Dict:
     if offset is None:
         offset = np.array([0, 0, 0])
 
     data = {}
     with laspy.file.File(path) as f:
-        x, y, z = f.x - offset[0], f.y - offset[1], f.z - offset[2]
+        x = (f.x - offset[0]).astype(xyz_dtype)
+        y = (f.y - offset[1]).astype(xyz_dtype)
+        z = (f.z - offset[2]).astype(xyz_dtype)
         if combine_xyz:
-            xyz = np.empty((f.header.count, 3), "f")
+            xyz = np.empty((f.header.count, 3), xyz_dtype)
             xyz[:, 0] = x
             xyz[:, 1] = y
             xyz[:, 2] = z
@@ -35,7 +42,11 @@ def read(
     return data
 
 
-def read_pandas(path, offset, *, other_dims=["intensity", "gps_time"]):
+def read_pandas(path, offset, *, xyz_dtype="d", other_dims=["intensity", "gps_time"]):
     import pandas as pd
 
-    return pd.DataFrame(read(path, offset, combine_xyz=False, other_dims=other_dims))
+    return pd.DataFrame(
+        read(
+            path, offset, combine_xyz=False, xyz_dtype=xyz_dtype, other_dims=other_dims
+        )
+    )

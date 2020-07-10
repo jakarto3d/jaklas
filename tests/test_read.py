@@ -43,3 +43,11 @@ def test_read_pandas():
     assert len(df["x"]) == 71
     assert "x" in df and "y" in df and "z" in df
     assert "gps_time" in df and "intensity" in df
+
+
+def test_read_dtype():
+    data = read(very_small_las, None, xyz_dtype="f")
+    assert data["xyz"].dtype == np.float32
+    data = read(very_small_las, None, xyz_dtype="d")
+    assert data["xyz"].dtype == np.float64
+
