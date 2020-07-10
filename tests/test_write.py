@@ -8,7 +8,7 @@ import pytest
 import las_writer
 import pandas as pd
 
-DATA_DIR = Path(__file__).parent / "data"
+TEMP_DIR = Path(__file__).parent / "temp"
 
 
 xyz = np.random.random((100, 3)) * 100
@@ -58,7 +58,7 @@ point_data_gps_time_pandas = pd.DataFrame(point_data_gps_time)
 point_data_gps_time_color_pandas = pd.DataFrame(point_data_gps_time_color)
 
 
-TEMP_OUTPUT = DATA_DIR / "temp.las"
+TEMP_OUTPUT = TEMP_DIR / "temp.las"
 
 
 @pytest.mark.parametrize("data", [point_data, point_data_pandas])

@@ -3,11 +3,11 @@ from pathlib import Path
 
 import pytest
 
-DATA_DIR = Path(__file__).parent / "data"
+TEMP_DIR = Path(__file__).parent / "temp"
 
 
 @pytest.fixture(autouse=True)
-def cleanup_data_dir():
-    DATA_DIR.mkdir(exist_ok=True)
+def cleanup_temp_dir():
+    TEMP_DIR.mkdir(exist_ok=True)
     yield
-    shutil.rmtree(DATA_DIR, ignore_errors=True)
+    shutil.rmtree(TEMP_DIR, ignore_errors=True)
