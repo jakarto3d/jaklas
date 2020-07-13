@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from setuptools import setup, find_packages
+from os.path import join
+import re
 
+from setuptools import find_packages, setup
 
 with open("README.md") as readme_file:
     readme = readme_file.read()
@@ -10,10 +12,12 @@ with open("README.md") as readme_file:
 with open("requirements.txt") as requirements_file:
     requirements = requirements_file.read().splitlines()
 
+about = open(join("src", "las_writer", "__about__.py")).read()
+version = re.search(r"__version__ ?= ?['\"](.+)['\"]", about).group(1)
 
 setup(
     name="las_writer",
-    version="0.1.2",
+    version=version,
     description="Point cloud writer to las file.",
     long_description=readme,
     author="Arnaud Venet",
