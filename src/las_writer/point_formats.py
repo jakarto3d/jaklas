@@ -76,10 +76,14 @@ def best_point_format(data) -> int:
         # if there are more than 32 classes, we must use point formats >= 6
         min_point_format = 6
 
+    def data_conforms_to_format(data, format_):
+        data_fields = [f for f in data if f not in ["xyz", "XYZ"]]
+        return all(k in format_ for k in data_fields)
+
     possible_formats = [
         n
-        for n, f in point_formats.items()
-        if all(k in f for k in data) and n >= min_point_format
+        for n, format_ in point_formats.items()
+        if data_conforms_to_format(data, format_) and n >= min_point_format
     ]
 
     if not possible_formats:

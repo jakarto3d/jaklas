@@ -116,6 +116,23 @@ def test_write_xyz(data):
         assert np.allclose(f.classification, data["classification"])
 
 
+@pytest.mark.parametrize("data", [point_data_gps_time])
+def test_write_xyz_with_gps_time(data):
+    data = deepcopy(data)
+    data["xyz"] = np.vstack([data["x"], data["y"], data["z"]]).T
+    del data["x"]
+    del data["y"]
+    del data["z"]
+    las_writer.write(data, TEMP_OUTPUT)
+    with laspy.file.File(TEMP_OUTPUT) as f:
+        assert np.allclose(f.x, data["xyz"][:, 0], atol=0.0001)
+        assert np.allclose(f.y, data["xyz"][:, 1], atol=0.0001)
+        assert np.allclose(f.z, data["xyz"][:, 2], atol=0.0001)
+        assert np.allclose(f.intensity, data["intensity"].astype("u2"))
+        assert np.allclose(f.classification, data["classification"])
+        assert np.allclose(f.gps_time, data["gps_time"])
+
+
 @pytest.mark.parametrize("data", [point_data_gps_time, point_data_gps_time_pandas])
 def test_write_gps_time(data):
     las_writer.write(data, TEMP_OUTPUT)
