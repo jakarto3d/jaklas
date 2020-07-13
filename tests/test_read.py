@@ -11,43 +11,43 @@ very_small_las = TEST_DATA / "very_small.las"
 
 
 def test_read_small():
-    data = read(very_small_las, None)
+    data = read(very_small_las)
     assert len(data["xyz"]) == 71
 
 
 def test_read_offset():
-    data1 = read(very_small_las, None)
-    data2 = read(very_small_las, (1, 1, 1))
+    data1 = read(very_small_las)
+    data2 = read(very_small_las, offset=(1, 1, 1))
     assert np.allclose(data1["xyz"], data2["xyz"] + 1)
 
 
 def test_read_not_combined():
-    data = read(very_small_las, None, combine_xyz=False)
+    data = read(very_small_las, combine_xyz=False)
     assert "x" in data and "y" in data and "z" in data
     assert "xyz" not in data
 
 
 def test_read_other_dims():
-    data = read(very_small_las, None, other_dims=["classification"])
+    data = read(very_small_las, other_dims=["classification"])
     assert "gps_time" not in data and "intensity" not in data
     assert "classification" in data
 
 
 def test_read_wrong_dim():
     with pytest.raises(KeyError):
-        data = read(very_small_las, None, other_dims=["wrong"])
+        data = read(very_small_las, other_dims=["wrong"])
 
 
 def test_read_pandas():
-    df = read_pandas(very_small_las, None)
+    df = read_pandas(very_small_las)
     assert len(df["x"]) == 71
     assert "x" in df and "y" in df and "z" in df
     assert "gps_time" in df and "intensity" in df
 
 
 def test_read_dtype():
-    data = read(very_small_las, None, xyz_dtype="f")
+    data = read(very_small_las, xyz_dtype="f")
     assert data["xyz"].dtype == np.float32
-    data = read(very_small_las, None, xyz_dtype="d")
+    data = read(very_small_las)
     assert data["xyz"].dtype == np.float64
 

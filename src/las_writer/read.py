@@ -6,8 +6,8 @@ import numpy as np
 
 def read(
     path,
-    offset,
     *,
+    offset=None,
     combine_xyz=True,
     xyz_dtype=np.float64,
     other_dims=["intensity", "gps_time"],
@@ -42,11 +42,17 @@ def read(
     return data
 
 
-def read_pandas(path, offset, *, xyz_dtype="d", other_dims=["intensity", "gps_time"]):
+def read_pandas(
+    path, *, offset=None, xyz_dtype="d", other_dims=["intensity", "gps_time"]
+):
     import pandas as pd
 
     return pd.DataFrame(
         read(
-            path, offset, combine_xyz=False, xyz_dtype=xyz_dtype, other_dims=other_dims
+            path,
+            offset=offset,
+            combine_xyz=False,
+            xyz_dtype=xyz_dtype,
+            other_dims=other_dims,
         )
     )
