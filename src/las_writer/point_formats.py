@@ -1,5 +1,7 @@
 import numpy as np
 
+from typing import List
+
 # Note some less often used attributes are omitted
 _base = {
     "x": "i4",
@@ -60,7 +62,7 @@ standard_dimensions = {
 }
 
 
-def best_point_format(data) -> int:
+def best_point_format(data, extra_dimensions: List[str] = None) -> int:
     """Returns the best point format depending on keys in the provided object.
 
     Args:
@@ -71,13 +73,15 @@ def best_point_format(data) -> int:
     Returns:
         int: The best point format. If none is matched, return 0 as a default.
     """
+    if extra_dimensions is None:
+        extra_dimensions = []
     min_point_format = 0
     if "classification" in data and np.any(data["classification"] >= 2 ** 5):
         # if there are more than 32 classes, we must use point formats >= 6
         min_point_format = 6
 
     def data_conforms_to_format(data, format_):
-        data_fields = [f for f in data if f not in ["xyz", "XYZ"]]
+        data_fields = [f for f in data if f not in extra_dimensions + ["xyz", "XYZ"]]
         return all(k in format_ for k in data_fields)
 
     possible_formats = [

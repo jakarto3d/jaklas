@@ -206,3 +206,12 @@ def test_write_extra_dimensions(data):
     with laspy.file.File(TEMP_OUTPUT) as f:
         assert np.allclose(f.new_stuff, data["new_stuff"])
         assert f.new_stuff.dtype == np.dtype("u1")
+
+@pytest.mark.parametrize("data", [point_data_gps_time, point_data_gps_time_pandas])
+def test_write_extra_dimensions_gps_time(data):
+    data["new_stuff"] = (np.random.random(100) * 100).astype("u1")
+    las_writer.write(data, TEMP_OUTPUT)
+    with laspy.file.File(TEMP_OUTPUT) as f:
+        assert np.allclose(f.new_stuff, data["new_stuff"])
+        assert np.allclose(f.gps_time, data["gps_time"])
+        assert f.new_stuff.dtype == np.dtype("u1")

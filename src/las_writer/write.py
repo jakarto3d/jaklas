@@ -57,18 +57,17 @@ def write(
     if data_min_max is None:
         data_min_max = {}
 
+    standard_dimensions = point_formats.standard_dimensions | {"xyz", "XYZ"}
+    extra_dimensions = sorted(set(point_data) - standard_dimensions)
+
     if not point_format:
-        point_format = point_formats.best_point_format(point_data)
+        point_format = point_formats.best_point_format(point_data, extra_dimensions)
 
     if point_format not in point_formats.supported_point_formats:
         raise ValueError(
             f"Unsupported point format {point_format} "
             f"(not in {point_formats.supported_point_formats})"
         )
-
-    standard_dimensions = point_formats.standard_dimensions | {"xyz", "XYZ"}
-
-    extra_dimensions = sorted(set(point_data) - standard_dimensions)
 
     point_format_type = point_formats.point_formats[point_format]
 
