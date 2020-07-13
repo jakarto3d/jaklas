@@ -9,12 +9,23 @@ _base = {
     "z": "i4",
     "intensity": "u2",
     "classification": "u1",
+    "return_num": "u1",
+    "num_returns": "u1",
+    "edge_flight_line": "B",
+    "scan_dir_flag": "B",
+    "scan_angle_rank": "u1",
+    "user_data": "u1",
+    "pt_src_id": "u2",
 }
 _gps_time = {"gps_time": "f8"}
 _colors = {
     "red": "u2",
     "green": "u2",
     "blue": "u2",
+}
+_base_6 = {
+    **_base,
+    "scan_angle": "u2",
 }
 point_formats = {
     0: {**_base},
@@ -23,8 +34,8 @@ point_formats = {
     3: {**_base, **_gps_time, **_colors},
     # formats >= 6 are used mostly because of more classification classes (256 vs 32)
     # and classifications 64-255 are user definable
-    6: {**_base, **_gps_time},
-    7: {**_base, **_gps_time, **_colors},
+    6: {**_base_6, **_gps_time},
+    7: {**_base_6, **_gps_time, **_colors},
 }
 
 supported_point_formats = list(point_formats)
@@ -45,6 +56,7 @@ standard_dimensions = {
     "blue",
     "flag_byte",
     "return_num",
+    "num_returns",
     "scan_dir_flag",
     "edge_flight_line",
     "scanner_channel",
