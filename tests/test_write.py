@@ -72,6 +72,25 @@ def test_write_simple(data):
         assert np.allclose(f.classification, data["classification"])
 
 
+@pytest.mark.parametrize("data", [point_data_gps_time, point_data_gps_time_pandas])
+def test_write_X_Y_Z(data):
+    data = deepcopy(data)
+    data["X"] = data["x"]
+    data["Y"] = data["y"]
+    data["Z"] = data["z"]
+    del data["x"]
+    del data["y"]
+    del data["z"]
+    las_writer.write(data, TEMP_OUTPUT)
+    with laspy.file.File(TEMP_OUTPUT) as f:
+        assert np.allclose(f.x, data["X"], atol=0.0001)
+        assert np.allclose(f.y, data["Y"], atol=0.0001)
+        assert np.allclose(f.z, data["Z"], atol=0.0001)
+        assert np.allclose(f.intensity, data["intensity"].astype("u2"))
+        assert np.allclose(f.classification, data["classification"])
+        assert np.allclose(f.gps_time, data["gps_time"])
+
+
 @pytest.mark.parametrize("data", [point_data, point_data_pandas])
 def test_write_offset(data):
     xyz_offset = (1, 2, 3)
@@ -206,6 +225,7 @@ def test_write_extra_dimensions(data):
     with laspy.file.File(TEMP_OUTPUT) as f:
         assert np.allclose(f.new_stuff, data["new_stuff"])
         assert f.new_stuff.dtype == np.dtype("u1")
+
 
 @pytest.mark.parametrize("data", [point_data_gps_time, point_data_gps_time_pandas])
 def test_write_extra_dimensions_gps_time(data):

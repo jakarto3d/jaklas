@@ -81,6 +81,8 @@ standard_dimensions = {
     "z_t",
 }
 
+allowed_standard_dimension_names = ["xyz", "XYZ", "X", "Y", "Z"]
+
 
 def best_point_format(data, extra_dimensions: List[str] = None) -> int:
     """Returns the best point format depending on keys in the provided object.
@@ -101,7 +103,11 @@ def best_point_format(data, extra_dimensions: List[str] = None) -> int:
         min_point_format = 6
 
     def data_conforms_to_format(data, format_):
-        data_fields = [f for f in data if f not in extra_dimensions + ["xyz", "XYZ"]]
+        data_fields = [
+            f
+            for f in data
+            if f not in extra_dimensions + allowed_standard_dimension_names
+        ]
         return all(k in format_ for k in data_fields)
 
     possible_formats = [
