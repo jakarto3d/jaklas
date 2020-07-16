@@ -195,5 +195,8 @@ def _guess_las_data_type(data):
         type_ = default
 
     if type_ not in las_data_types:
-        raise NotImplementedError("Array type not implemented: %s" % type_)
+        raise NotImplementedError(
+            "Array type not implemented "
+            f"(most likely not implemented in the las specification): {type_}"
+        )
     return las_data_types.index(type_) + 1
