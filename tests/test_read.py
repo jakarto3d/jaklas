@@ -4,9 +4,10 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from las_writer import read, read_pandas
+from las_writer import read, read_pandas, write
 
 TEST_DATA = Path(__file__).parent / "data"
+TEMP_DIR = Path(__file__).parent / "temp"
 very_small_las = TEST_DATA / "very_small.las"
 
 
@@ -51,3 +52,21 @@ def test_read_dtype():
     data = read(very_small_las)
     assert data["xyz"].dtype == np.float64
 
+
+def test_read_all_fields():
+    data = read(very_small_las)
+    out = TEMP_DIR / "out.las"
+    data["something_else"] = np.full(len(data["xyz"]), fill_value=1)
+    write(data, out)
+    data_out = read(out)
+    assert sorted(list(data_out)) == [
+        "classification",
+        "flag_byte",
+        "gps_time",
+        "intensity",
+        "pt_src_id",
+        "scan_angle_rank",
+        "something_else",
+        "user_data",
+        "xyz",
+    ]

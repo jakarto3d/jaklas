@@ -10,7 +10,8 @@ def read(
     offset=None,
     combine_xyz=True,
     xyz_dtype=np.float64,
-    other_dims=["intensity", "gps_time"],
+    other_dims=None,
+    ignore_missing_dims=False,
 ) -> Dict:
     if offset is None:
         offset = np.array([0, 0, 0])
@@ -32,8 +33,14 @@ def read(
             data["y"] = y
             data["z"] = z
 
+        if other_dims is None:
+            other_dims = set(f.point_format.lookup) - set("XYZ")
+            # classification flags are skipped
+            other_dims.add("classification")
+            other_dims.remove("raw_classification")
+
         for dim in other_dims:
-            if not hasattr(f, dim):
+            if not ignore_missing_dims and not hasattr(f, dim):
                 raise KeyError(f"Dimension not found in file {dim}")
 
             # np.array is required, because f contains a memory view and will close
@@ -42,9 +49,7 @@ def read(
     return data
 
 
-def read_pandas(
-    path, *, offset=None, xyz_dtype="d", other_dims=["intensity", "gps_time"]
-):
+def read_pandas(path, *, offset=None, xyz_dtype="d", other_dims=None):
     import pandas as pd
 
     return pd.DataFrame(

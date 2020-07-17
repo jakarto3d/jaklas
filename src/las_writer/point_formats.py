@@ -9,11 +9,14 @@ _base = {
     "z": "i4",
     "intensity": "u2",
     "classification": "u1",
+    "raw_classification": "u1",
+    "classification_flags": "u1",
     "return_num": "u1",
     "num_returns": "u1",
     "edge_flight_line": "B",
     "scan_dir_flag": "B",
     "scan_angle_rank": "u1",
+    "flag_byte": "u1",
     "user_data": "u1",
     "pt_src_id": "u2",
 }
@@ -84,7 +87,9 @@ standard_dimensions = {
 allowed_standard_dimension_names = ["xyz", "XYZ", "X", "Y", "Z"]
 
 
-def best_point_format(data, extra_dimensions: List[str] = None) -> int:
+def best_point_format(
+    data, extra_dimensions: List[str] = None, default_format=6
+) -> int:
     """Returns the best point format depending on keys in the provided object.
 
     Args:
@@ -117,6 +122,6 @@ def best_point_format(data, extra_dimensions: List[str] = None) -> int:
     ]
 
     if not possible_formats:
-        return min_point_format
+        return default_format
 
     return min(possible_formats, key=lambda n: len(point_formats[n]))
