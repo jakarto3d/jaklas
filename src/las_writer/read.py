@@ -3,6 +3,8 @@ from typing import Dict
 import laspy
 import numpy as np
 
+from .header import Header
+
 
 def read(
     path,
@@ -47,6 +49,15 @@ def read(
             data[dim] = np.array(getattr(f, dim))
 
     return data
+
+
+def read_header(path) -> Header:
+    """Read header information from las file.
+
+    Should be roughly 50x faster than laspy.
+    """
+    with open(path, "rb") as f:
+        return Header(f)
 
 
 def read_pandas(path, *, offset=None, xyz_dtype="d", other_dims=None):
