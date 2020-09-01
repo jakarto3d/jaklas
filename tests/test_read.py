@@ -5,7 +5,7 @@ import laspy
 import numpy as np
 import pytest
 
-from las_writer import read, read_header, read_pandas, write
+from jaklas import read, read_header, read_pandas, write
 
 TEST_DATA = Path(__file__).parent / "data"
 TEMP_DIR = Path(__file__).parent / "temp"
