@@ -1,6 +1,6 @@
-# las_writer
+# jaklas
 
-las_writer est un repo permettant d'enregistrer des tableaux pandas en nuage de point au format .las
+jaklas est un repo permettant d'enregistrer des tableaux pandas en nuage de point au format .las
 
 (ou tout object qui implémente ``__getitem__``)
 
@@ -13,8 +13,8 @@ laspy
 
 ## Installation
 ```bash
-git clone git@github.com:jakarto3d/las_writer.git
-cd las_writer
+git clone git@github.com:jakarto3d/jaklas.git
+cd jaklas
 python -m pip install .
 ```
 
@@ -25,7 +25,7 @@ pytest
 ```
 
 ## Utilisation
-La fonction ``las_writer.write`` convertit un pandas dataframe en fichier las. 
+La fonction ``jaklas.write`` convertit un pandas dataframe en fichier las. 
 Le dataframe **doit** avoir les champs:
  - x (ou X)
  - y (ou Y)
@@ -41,7 +41,7 @@ et il peut avoir les champs:
 
 Voir l'exemple :
 ```python
-import las_writer
+import jaklas
 import pandas
 data = {'gps_time': [0, 1.232, 2.543, 3.741],
         'intensity': [14578, 54236, 14265, 12543],
@@ -51,10 +51,10 @@ data = {'gps_time': [0, 1.232, 2.543, 3.741],
         }
 dataframe = pandas.DataFrame(data)
 filename = 'exemple.las'
-las_writer.write(dataframe, filename)
+jaklas.write(dataframe, filename)
 ```
 
-Voir les paramètres de la fonction ``las_writer.write`` pour plus de fonctionnalités:
+Voir les paramètres de la fonction ``jaklas.write`` pour plus de fonctionnalités:
 
  - gestion automatique du format de points dans le fichier las de sortie
  - data_min_max est utilisé pour mettre à l'échelle les données en fonction du format des champs

@@ -12,17 +12,17 @@ with open("README.md") as readme_file:
 with open("requirements.txt") as requirements_file:
     requirements = requirements_file.read().splitlines()
 
-about = open(join("src", "las_writer", "__about__.py")).read()
+about = open(join("src", "jaklas", "__about__.py")).read()
 version = re.search(r"__version__ ?= ?['\"](.+)['\"]", about).group(1)
 
 setup(
-    name="las_writer",
+    name="jaklas",
     version=version,
     description="Point cloud writer to las file.",
     long_description=readme,
     author="Arnaud Venet",
     author_email="arnaud.venet@jakarto.com",
-    url="https://github.com/jakarto3d/las_writer",
+    url="https://github.com/jakarto3d/jaklas",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     python_requires=">=3.6",

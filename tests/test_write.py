@@ -5,7 +5,7 @@ import laspy
 import numpy as np
 import pytest
 
-import las_writer
+import jaklas
 import pandas as pd
 
 TEMP_DIR = Path(__file__).parent / "temp"
@@ -63,7 +63,7 @@ TEMP_OUTPUT = TEMP_DIR / "temp.las"
 
 @pytest.mark.parametrize("data", [point_data, point_data_pandas])
 def test_write_simple(data):
-    las_writer.write(data, TEMP_OUTPUT)
+    jaklas.write(data, TEMP_OUTPUT)
     with laspy.file.File(TEMP_OUTPUT) as f:
         assert np.allclose(f.x, data["x"], atol=0.0001)
         assert np.allclose(f.y, data["y"], atol=0.0001)
@@ -81,7 +81,7 @@ def test_write_X_Y_Z(data):
     del data["x"]
     del data["y"]
     del data["z"]
-    las_writer.write(data, TEMP_OUTPUT)
+    jaklas.write(data, TEMP_OUTPUT)
     with laspy.file.File(TEMP_OUTPUT) as f:
         assert np.allclose(f.x, data["X"], atol=0.0001)
         assert np.allclose(f.y, data["Y"], atol=0.0001)
@@ -94,7 +94,7 @@ def test_write_X_Y_Z(data):
 @pytest.mark.parametrize("data", [point_data, point_data_pandas])
 def test_write_offset(data):
     xyz_offset = (1, 2, 3)
-    las_writer.write(data, TEMP_OUTPUT, xyz_offset=xyz_offset)
+    jaklas.write(data, TEMP_OUTPUT, xyz_offset=xyz_offset)
     with laspy.file.File(TEMP_OUTPUT) as f:
         assert np.allclose(f.x, data["x"] + xyz_offset[0], atol=0.0001)
         assert np.allclose(f.y, data["y"] + xyz_offset[1], atol=0.0001)
@@ -110,7 +110,7 @@ def test_write_offset_large_coordinates(data):
     data["x"] = data["x"].astype("f")
     data["y"] = data["y"].astype("f")
     data["z"] = data["z"].astype("f")
-    las_writer.write(data, TEMP_OUTPUT, xyz_offset=xyz_offset)
+    jaklas.write(data, TEMP_OUTPUT, xyz_offset=xyz_offset)
     with laspy.file.File(TEMP_OUTPUT) as f:
         assert np.allclose(f.x, data["x"].astype("d") + xyz_offset[0], atol=0.0001)
         assert np.allclose(f.y, data["y"].astype("d") + xyz_offset[1], atol=0.0001)
@@ -126,7 +126,7 @@ def test_write_xyz(data):
     del data["x"]
     del data["y"]
     del data["z"]
-    las_writer.write(data, TEMP_OUTPUT)
+    jaklas.write(data, TEMP_OUTPUT)
     with laspy.file.File(TEMP_OUTPUT) as f:
         assert np.allclose(f.x, data["xyz"][:, 0], atol=0.0001)
         assert np.allclose(f.y, data["xyz"][:, 1], atol=0.0001)
@@ -142,7 +142,7 @@ def test_write_xyz_with_gps_time(data):
     del data["x"]
     del data["y"]
     del data["z"]
-    las_writer.write(data, TEMP_OUTPUT)
+    jaklas.write(data, TEMP_OUTPUT)
     with laspy.file.File(TEMP_OUTPUT) as f:
         assert np.allclose(f.x, data["xyz"][:, 0], atol=0.0001)
         assert np.allclose(f.y, data["xyz"][:, 1], atol=0.0001)
@@ -154,14 +154,14 @@ def test_write_xyz_with_gps_time(data):
 
 @pytest.mark.parametrize("data", [point_data_gps_time, point_data_gps_time_pandas])
 def test_write_gps_time(data):
-    las_writer.write(data, TEMP_OUTPUT)
+    jaklas.write(data, TEMP_OUTPUT)
     with laspy.file.File(TEMP_OUTPUT) as f:
         assert np.allclose(f.gps_time, data["gps_time"], atol=0.0001)
 
 
 @pytest.mark.parametrize("data", [point_data_color, point_data_color_pandas])
 def test_write_color(data):
-    las_writer.write(data, TEMP_OUTPUT)
+    jaklas.write(data, TEMP_OUTPUT)
     with laspy.file.File(TEMP_OUTPUT) as f:
         assert np.allclose(f.red, data["red"].astype("u2"))
         assert np.allclose(f.green, data["green"].astype("u2"))
@@ -183,12 +183,12 @@ def test_write_color(data):
     ],
 )
 def test_write_point_format(data, point_format):
-    assert las_writer.best_point_format(data) == point_format
+    assert jaklas.best_point_format(data) == point_format
 
 
 def test_write_large_classifications():
     data = point_data_large_classification
-    las_writer.write(data, TEMP_OUTPUT)
+    jaklas.write(data, TEMP_OUTPUT)
     with laspy.file.File(TEMP_OUTPUT) as f:
         assert f.point_format.fmt == "6"
         assert np.allclose(f.x, data["x"], atol=0.0001)
@@ -210,7 +210,7 @@ def test_write_scaled():
     def u1_to_u2(data):
         return data * (2 ** 8 + 1)
 
-    las_writer.write(data, TEMP_OUTPUT, data_min_max=data_min_max)
+    jaklas.write(data, TEMP_OUTPUT, data_min_max=data_min_max)
     with laspy.file.File(TEMP_OUTPUT) as f:
         assert np.allclose(f.intensity, u1_to_u2(data["intensity"]).astype("u2"))
         assert np.allclose(f.red, u1_to_u2(data["red"]).astype("u2"))
@@ -221,7 +221,7 @@ def test_write_scaled():
 @pytest.mark.parametrize("data", [point_data, point_data_pandas])
 def test_write_extra_dimensions(data):
     data["new_stuff"] = (np.random.random(100) * 100).astype("u1")
-    las_writer.write(data, TEMP_OUTPUT)
+    jaklas.write(data, TEMP_OUTPUT)
     with laspy.file.File(TEMP_OUTPUT) as f:
         assert np.allclose(f.new_stuff, data["new_stuff"])
         assert f.new_stuff.dtype == np.dtype("u1")
@@ -230,7 +230,7 @@ def test_write_extra_dimensions(data):
 @pytest.mark.parametrize("data", [point_data_gps_time, point_data_gps_time_pandas])
 def test_write_extra_dimensions_gps_time(data):
     data["new_stuff"] = (np.random.random(100) * 100).astype("u1")
-    las_writer.write(data, TEMP_OUTPUT)
+    jaklas.write(data, TEMP_OUTPUT)
     with laspy.file.File(TEMP_OUTPUT) as f:
         assert np.allclose(f.new_stuff, data["new_stuff"])
         assert np.allclose(f.gps_time, data["gps_time"])

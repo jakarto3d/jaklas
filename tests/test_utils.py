@@ -4,7 +4,7 @@ import pytest
 import numpy as np
 import pandas as pd
 
-from las_writer import utils
+from jaklas import utils
 
 xyz = np.random.random((100, 3)) * 100
 intensity = np.random.random(100) * 100
