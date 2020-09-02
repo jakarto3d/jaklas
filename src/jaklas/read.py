@@ -37,6 +37,8 @@ def read(
 
         if other_dims is None:
             other_dims = set(f.point_format.lookup) - set("XYZ")
+            # format property access like laspy does
+            other_dims = set(d.replace(" ", "_").lower() for d in other_dims)
             # classification flags are skipped
             other_dims.add("classification")
             other_dims.remove("raw_classification")
