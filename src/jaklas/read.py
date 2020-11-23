@@ -39,12 +39,20 @@ def read(
             other_dims = set(f.point_format.lookup) - set("XYZ")
             # format property access like laspy does
             other_dims = set(d.replace(" ", "_").lower() for d in other_dims)
-            # for las files < 1.4, we remove the raw_classification laspy property
+            # for las files < 1.4, we remove the `raw_classification` laspy property
             # when other dims is None, as this property is a bit unintuitive.
             # This can still be asked explicitely.
             other_dims.add("classification")
             try:
                 other_dims.remove("raw_classification")
+            except KeyError:
+                pass
+            # for las files >= 1.4, the `classification_byte` laspy property
+            # is the same as `classification`. But `point_format.lookup` has
+            # `classification_byte` while this dimension has no getter on the laspy
+            # file object.
+            try:
+                other_dims.remove("classification_byte")
             except KeyError:
                 pass
 
