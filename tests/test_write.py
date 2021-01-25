@@ -233,9 +233,11 @@ def test_write_scaled():
 @pytest.mark.parametrize("data", [point_data, point_data_pandas])
 def test_write_extra_dimensions(data):
     data["new_stuff"] = (np.random.random(100) * 100).astype("u1")
+    data["new_stuff_float"] = (np.random.random(100) * 100).astype("f4")
     jaklas.write(data, TEMP_OUTPUT)
     f = pylas.read(str(TEMP_OUTPUT))
     assert np.allclose(f.new_stuff, data["new_stuff"])
+    assert np.allclose(f.new_stuff_float, data["new_stuff_float"])
     assert f.new_stuff.dtype == np.dtype("u1")
 
 

@@ -91,7 +91,8 @@ def write(
     las = pylas.create(file_version="1.4", point_format_id=point_format)
 
     for dim in extra_dimensions:
-        las.add_extra_dim(name=dim, type=str(point_data[dim].dtype))
+        dtype = point_data[dim].dtype
+        las.add_extra_dim(name=dim, type=f"{dtype.kind}{dtype.itemsize}")
 
     min_, max_, offset = _min_max_offset(xyz)
     min_ += xyz_offset
