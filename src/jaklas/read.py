@@ -1,6 +1,6 @@
 from typing import Dict
 
-import laspy
+import pylas
 import numpy as np
 
 from .header import Header
@@ -19,57 +19,42 @@ def read(
         offset = np.array([0, 0, 0])
 
     data = {}
-    with laspy.file.File(path) as f:
-        x = (f.x - offset[0]).astype(xyz_dtype)
-        y = (f.y - offset[1]).astype(xyz_dtype)
-        z = (f.z - offset[2]).astype(xyz_dtype)
-        if combine_xyz:
-            xyz = np.empty((f.header.count, 3), xyz_dtype)
-            xyz[:, 0] = x
-            xyz[:, 1] = y
-            xyz[:, 2] = z
-            data["xyz"] = xyz
-            del x, y, z
-        else:
-            data["x"] = x
-            data["y"] = y
-            data["z"] = z
+    
+    las = pylas.read(str(path))
 
-        if other_dims is None:
-            other_dims = set(f.point_format.lookup) - set("XYZ")
-            # format property access like laspy does
-            other_dims = set(d.replace(" ", "_").lower() for d in other_dims)
-            # for las files < 1.4, we remove the `raw_classification` laspy property
-            # when other dims is None, as this property is a bit unintuitive.
-            # This can still be asked explicitely.
-            other_dims.add("classification")
-            try:
-                other_dims.remove("raw_classification")
-            except KeyError:
-                pass
-            # for las files >= 1.4, the `classification_byte` laspy property
-            # is the same as `classification`. But `point_format.lookup` has
-            # `classification_byte` while this dimension has no getter on the laspy
-            # file object.
-            try:
-                other_dims.remove("classification_byte")
-            except KeyError:
-                pass
+    x = (las.x - offset[0]).astype(xyz_dtype)
+    y = (las.y - offset[1]).astype(xyz_dtype)
+    z = (las.z - offset[2]).astype(xyz_dtype)
 
-        for dim in other_dims:
-            if not ignore_missing_dims and not hasattr(f, dim):
-                raise KeyError(f"Dimension not found in file {dim}")
+    if combine_xyz:
+        data["xyz"] = np.hstack([x[np.newaxis].T, y[np.newaxis].T, z[np.newaxis].T])
+    else:
+        data["x"] = x
+        data["y"] = y
+        data["z"] = z
 
-            # np.array is required, because f contains a memory view and will close
-            data[dim] = np.array(getattr(f, dim))
+    del x, y, z
+
+    if other_dims is None:
+        other_dims = set(las.point_format.dimension_names) - set("XYZ")
+
+    for dim in other_dims:
+        if not ignore_missing_dims and not hasattr(las, dim):
+            raise KeyError(f"Dimension not found in file {dim}")
+
+        data[dim] = getattr(las, dim)
 
     return data
 
 
 def read_header(path) -> Header:
-    """Read header information from las file.
+    """Read some header information from las file.
 
-    Should be roughly 50x faster than laspy.
+    The main use case of this function if when you have a large list
+    of las files, and you want to quickly scan bounding boxes.
+
+    Should be roughly 50x faster than laspy,
+    and close to 10x than the master branch of pylas.
     """
     with open(path, "rb") as f:
         return Header(f)

@@ -1,2 +1,3 @@
 numpy
-laspy
+pylas~=0.4.3  # pylas 0.5 wil probably use lazrs instead of lazperf
+lazperf

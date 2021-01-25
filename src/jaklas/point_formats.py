@@ -1,24 +1,29 @@
+from os import stat_result
+import pylas
 import numpy as np
 
 from typing import List
+from pylas.point.dims import POINT_FORMAT_DIMENSIONS, COMPOSED_FIELDS_0, COMPOSED_FIELDS_6
 
-# Note some less often used attributes are omitted
-_base = {
-    "x": "i4",
-    "y": "i4",
-    "z": "i4",
+# pylas standard attributes depending on the point format
+_base_format_0 = {
+    "X": "i4",
+    "Y": "i4",
+    "Z": "i4",
     "intensity": "u2",
-    "classification": "u1",
-    "raw_classification": "u1",
-    "classification_flags": "u1",
-    "return_num": "u1",
-    "num_returns": "u1",
-    "edge_flight_line": "B",
-    "scan_dir_flag": "B",
     "scan_angle_rank": "u1",
-    "flag_byte": "u1",
     "user_data": "u1",
-    "pt_src_id": "u2",
+    "point_source_id": "u2",
+    # composed field (bit_fields):
+    "return_number": "u1",
+    "number_of_returns": "u1",
+    "scan_direction_flag": "B",
+    "edge_of_flight_line": "B",
+    # composed field (raw_classification):
+    "classification": "u1",
+    "synthetic": "B",
+    "key_point": "B",
+    "withheld": "B",
 }
 _gps_time = {"gps_time": "f8"}
 _colors = {
@@ -26,65 +31,37 @@ _colors = {
     "green": "u2",
     "blue": "u2",
 }
-_base_6 = {
-    **_base,
+_base_format_6 = {
+    **_base_format_0,
+    **_gps_time,
+    "classification_flags": "u1",
+    "scanner_channel": "u1",
     "scan_angle": "u2",
 }
 point_formats = {
-    0: {**_base},
-    1: {**_base, **_gps_time},
-    2: {**_base, **_colors},
-    3: {**_base, **_gps_time, **_colors},
-    # formats >= 6 are used mostly because of more classification classes (256 vs 32)
+    0: {**_base_format_0},
+    1: {**_base_format_0, **_gps_time},
+    2: {**_base_format_0, **_colors},
+    3: {**_base_format_0, **_gps_time, **_colors},
+    # for now, formats >= 6 are used mostly because of more classification classes (256 vs 32)
     # and classifications 64-255 are user definable
-    6: {**_base_6, **_gps_time},
-    7: {**_base_6, **_gps_time, **_colors},
+    6: {**_base_format_6},
+    7: {**_base_format_6, **_colors},
 }
 
 supported_point_formats = list(point_formats)
 
 # everything that is not an extra dimension
-standard_dimensions = {
-    "x",
-    "y",
-    "z",
-    "X",
-    "Y",
-    "Z",
-    "intensity",
-    "gps_time",
-    "classification",
-    "red",
-    "green",
-    "blue",
-    "flag_byte",
-    "return_num",
-    "num_returns",
-    "scan_dir_flag",
-    "edge_flight_line",
-    "scanner_channel",
-    "synthetic",
-    "key_point",
-    "withheld",
-    "overlap",
-    "classification_flags",
-    "classification_byte",
-    "raw_classification",
-    "scan_angle_rank",
-    "scan_angle",
-    "user_data",
-    "pt_src_id",
-    "nir",
-    "wave_packet_desc_index",
-    "byte_offset_to_waveform_data",
-    "waveform_packet_size",
-    "return_point_waveform_loc",
-    "x_t",
-    "y_t",
-    "z_t",
+standard_dimensions = {"x", 'y', 'z'} | {
+    name
+    for format in POINT_FORMAT_DIMENSIONS.values()
+    for name in format
 }
-
-allowed_standard_dimension_names = ["xyz", "XYZ", "X", "Y", "Z"]
+# substitute composed fields
+for composed_field, values in COMPOSED_FIELDS_6.items():
+    for subfield in values:
+        standard_dimensions.add(subfield.name)
+    standard_dimensions.remove(composed_field)
 
 
 def best_point_format(
@@ -111,7 +88,7 @@ def best_point_format(
         data_fields = [
             f
             for f in data
-            if f not in extra_dimensions + allowed_standard_dimension_names
+            if f not in extra_dimensions + ["xyz", "XYZ", "x", "y", "z"]
         ]
         return all(k in format_ for k in data_fields)
 
