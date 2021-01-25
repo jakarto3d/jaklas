@@ -1,9 +1,7 @@
-from os import stat_result
-import pylas
-import numpy as np
-
 from typing import List
-from pylas.point.dims import POINT_FORMAT_DIMENSIONS, COMPOSED_FIELDS_0, COMPOSED_FIELDS_6
+
+import numpy as np
+from pylas.point.dims import COMPOSED_FIELDS_6, POINT_FORMAT_DIMENSIONS
 
 # pylas standard attributes depending on the point format
 _base_format_0 = {
@@ -43,8 +41,8 @@ point_formats = {
     1: {**_base_format_0, **_gps_time},
     2: {**_base_format_0, **_colors},
     3: {**_base_format_0, **_gps_time, **_colors},
-    # for now, formats >= 6 are used mostly because of more classification classes (256 vs 32)
-    # and classifications 64-255 are user definable
+    # for now, formats >= 6 are used mostly because of more
+    # classification classes (256 vs 32) and classifications 64-255 are user definable
     6: {**_base_format_6},
     7: {**_base_format_6, **_colors},
 }
@@ -52,11 +50,9 @@ point_formats = {
 supported_point_formats = list(point_formats)
 
 # everything that is not an extra dimension
-standard_dimensions = {"x", 'y', 'z'} | {
-    name
-    for format in POINT_FORMAT_DIMENSIONS.values()
-    for name in format
-}
+standard_dimensions = {
+    name for format in POINT_FORMAT_DIMENSIONS.values() for name in format
+} | {"x", "y", "z"}
 # substitute composed fields
 for composed_field, values in COMPOSED_FIELDS_6.items():
     for subfield in values:
@@ -86,9 +82,7 @@ def best_point_format(
 
     def data_conforms_to_format(data, format_):
         data_fields = [
-            f
-            for f in data
-            if f not in extra_dimensions + ["xyz", "XYZ", "x", "y", "z"]
+            f for f in data if f not in extra_dimensions + ["xyz", "XYZ", "x", "y", "z"]
         ]
         return all(k in format_ for k in data_fields)
 

@@ -19,7 +19,7 @@ def read(
         offset = np.array([0, 0, 0])
 
     data = {}
-    
+
     las = pylas.read(str(path))
 
     x = (las.x - offset[0]).astype(xyz_dtype)
