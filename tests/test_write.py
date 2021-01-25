@@ -58,12 +58,25 @@ point_data_gps_time_color_pandas = pd.DataFrame(point_data_gps_time_color)
 
 
 TEMP_OUTPUT = TEMP_DIR / "temp.las"
+TEMP_OUTPUT_LAZ = TEMP_DIR / "temp.laz"
 
 
 @pytest.mark.parametrize("data", [point_data, point_data_pandas])
 def test_write_simple(data):
     jaklas.write(data, TEMP_OUTPUT)
     f = pylas.read(str(TEMP_OUTPUT))
+    assert np.allclose(f.x, data["x"], atol=0.0001)
+    assert np.allclose(f.y, data["y"], atol=0.0001)
+    assert np.allclose(f.z, data["z"], atol=0.0001)
+    assert np.allclose(f.intensity, data["intensity"].astype("u2"))
+    assert np.allclose(f.classification, data["classification"])
+
+
+@pytest.mark.parametrize("data", [point_data, point_data_pandas])
+def test_write_simple_laz(data):
+    jaklas.write(data, TEMP_OUTPUT_LAZ)
+    f = pylas.read(str(TEMP_OUTPUT_LAZ))
+    assert f.header.are_points_compressed
     assert np.allclose(f.x, data["x"], atol=0.0001)
     assert np.allclose(f.y, data["y"], atol=0.0001)
     assert np.allclose(f.z, data["z"], atol=0.0001)

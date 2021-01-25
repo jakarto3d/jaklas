@@ -8,10 +8,16 @@ from jaklas import read, read_header, read_pandas, write
 TEST_DATA = Path(__file__).parent / "data"
 TEMP_DIR = Path(__file__).parent / "temp"
 very_small_las = TEST_DATA / "very_small.las"
+very_small_laz = TEST_DATA / "very_small.laz"
 
 
 def test_read_small():
     data = read(very_small_las)
+    assert len(data["xyz"]) == 71
+
+
+def test_read_small_laz():
+    data = read(very_small_laz)
     assert len(data["xyz"]) == 71
 
 
