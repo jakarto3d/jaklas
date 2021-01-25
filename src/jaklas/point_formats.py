@@ -88,7 +88,7 @@ def best_point_format(
         data_fields = [
             f
             for f in data
-            if f not in extra_dimensions + ["xyz", "XYZ", 'x', 'y', 'z']
+            if f not in extra_dimensions + ["xyz", "XYZ", "x", "y", "z"]
         ]
         return all(k in format_ for k in data_fields)
 

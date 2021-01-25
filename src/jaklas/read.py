@@ -27,7 +27,7 @@ def read(
     z = (las.z - offset[2]).astype(xyz_dtype)
 
     if combine_xyz:
-        data["xyz"] = np.hstack([x[np.newaxis].T, y[np.newaxis].T,z[np.newaxis].T])
+        data["xyz"] = np.hstack([x[np.newaxis].T, y[np.newaxis].T, z[np.newaxis].T])
     else:
         data["x"] = x
         data["y"] = y
