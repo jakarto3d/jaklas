@@ -1,15 +1,14 @@
 # jaklas
 
-jaklas est un repo permettant d'enregistrer des tableaux pandas en nuage de point au format .las
+jaklas is a thin wrapper around ``pylas`` to make reading and writing las files as
+simple as possible.
 
-(ou tout object qui implémente ``__getitem__``)
+The main use case is to write a pandas array to a las file in a single function call.
+The las file attributes (point offset, point scaling, file version, point format, etc.)
+are inferred depending on column names, datatype and point values.
 
-## Requirements
-```bash
-numpy
-pandas
-pylas
-```
+The las writer supports any object implementing ``__getitem__`` that has the 
+correct field names.
 
 ## Installation
 ```bash
@@ -18,43 +17,70 @@ cd jaklas
 python -m pip install .
 ```
 
-### Tester l'installation
+### Testing
 ```bash
 pip install -r requirements-dev.txt
 pytest
 ```
 
-## Utilisation
-La fonction ``jaklas.write`` convertit un pandas dataframe en fichier las. 
-Le dataframe **doit** avoir les champs:
- - x (ou X)
- - y (ou Y)
- - z (ou Z)
-et il peut avoir les champs:
+## Usage
+``jaklas.write`` writes a pandas dataframe (or a dict) to a las file.
+
+The dataframe **must** have either (case insensitive):
+- 'x', 'y' and 'z' columns 
+- or an 'xyz' column
+
+and it can have other las attributes (case sensitive names taken from ``pylas``):
  - gps_time
  - intensity
  - classification
  - red
  - green
  - blue
- - tout autre champs personnalisé
+ - edge_of_flight_line
+ - key_point
+ - nir
+ - number_of_returns
+ - overlap
+ - point_source_id
+ - raw_classification
+ - return_number
+ - return_point_wave_location
+ - scan_angle
+ - scan_angle_rank
+ - scan_direction_flag
+ - scanner_channel
+ - synthetic
+ - user_data
+ - wavepacket_index
+ - wavepacket_offset
+ - wavepacket_size
+ - withheld
+ - x_t
+ - y_t
+ - z_t
 
-Voir l'exemple :
+other column names will be written as extra dimensions.
+
+## Example
+
 ```python
 import jaklas
 import pandas
-data = {'gps_time': [0, 1.232, 2.543, 3.741],
-        'intensity': [14578, 54236, 14265, 12543],
-        'X': [456, 234, 567, 432],
-        'Y': [10234, 10256, 10789, 10275],
-        'Z': [10, 11, 12, 13]
-        }
+
+data = {
+    'gps_time': [0, 1.232, 2.543, 3.741],
+    'intensity': [14578, 54236, 1425, 12543],
+    'X': [456, 234, 567, 432],
+    'Y': [10234, 10256, 10789, 10275],
+    'Z': [10, 11, 12, 13],
+}
 dataframe = pandas.DataFrame(data)
-filename = 'exemple.las'
+filename = 'example.las'
 jaklas.write(dataframe, filename)
 ```
 
-Voir les paramètres de la fonction ``jaklas.write`` pour plus de fonctionnalités:
+Note the upper case 'X', 'Y' and 'Z' point data are the real coordinates,
+not the scaled int32 ones like in the las file.
 
- - gestion automatique du format de points dans le fichier las de sortie
- - data_min_max est utilisé pour mettre à l'échelle les données en fonction du format des champs
+See ``jaklas.write`` docstring for more options like controlling offset and scaling.
