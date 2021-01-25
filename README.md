@@ -1,6 +1,6 @@
 # jaklas
 
-jaklas is a thin wrapper around ``pylas`` to make reading and writing las files as
+jaklas is a thin wrapper around [``pylas``](https://github.com/tmontaigu/pylas) to make reading and writing las files as
 simple as possible.
 
 The main use case is to write a pandas array to a las file in a single function call.
@@ -83,4 +83,4 @@ jaklas.write(dataframe, filename)
 Note the upper case 'X', 'Y' and 'Z' point data are the real coordinates,
 not the scaled int32 ones like in the las file.
 
-See ``jaklas.write`` docstring for more options like controlling offset and scaling.
+See [``jaklas.write``](https://github.com/jakarto3d/jaklas/blob/master/src/jaklas/write.py) docstring for more options like controlling offset and scaling.
