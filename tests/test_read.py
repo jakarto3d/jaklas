@@ -1,10 +1,8 @@
-from copy import deepcopy
 from pathlib import Path
-import laspy
 
 import numpy as np
+import pylas
 import pytest
-
 from jaklas import read, read_header, read_pandas, write
 
 TEST_DATA = Path(__file__).parent / "data"
@@ -36,7 +34,7 @@ def test_read_other_dims():
 
 
 def test_read_wrong_dim():
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         data = read(very_small_las, other_dims=["wrong"])
 
 
@@ -62,13 +60,19 @@ def test_read_all_fields():
     data_out = read(out)
     assert sorted(list(data_out)) == [
         "classification",
-        "flag_byte",
+        "edge_of_flight_line",
         "gps_time",
         "intensity",
-        "pt_src_id",
+        "key_point",
+        "number_of_returns",
+        "point_source_id",
+        "return_number",
         "scan_angle_rank",
+        "scan_direction_flag",
         "something_else",
+        "synthetic",
         "user_data",
+        "withheld",
         "xyz",
     ]
 
@@ -76,8 +80,8 @@ def test_read_all_fields():
 def test_read_offset():
     header = read_header(very_small_las)
 
-    with laspy.file.File(very_small_las) as f:
-        assert f.header.scale == header.scale
-        assert f.header.offset == header.offset
-        assert f.header.min == header.min
-        assert f.header.max == header.max
+    with pylas.open(str(very_small_las)) as f:
+        assert list(f.header.scales) == header.scale
+        assert list(f.header.offsets) == header.offset
+        assert list(f.header.mins) == header.min
+        assert list(f.header.maxs) == header.max

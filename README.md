@@ -8,7 +8,7 @@ jaklas est un repo permettant d'enregistrer des tableaux pandas en nuage de poin
 ```bash
 numpy
 pandas
-laspy
+pylas
 ```
 
 ## Installation

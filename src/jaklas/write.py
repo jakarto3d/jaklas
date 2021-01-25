@@ -1,9 +1,9 @@
-from pathlib import Path
 import types
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
-import laspy
 import numpy as np
+import pylas
 
 from . import point_formats
 
@@ -13,7 +13,7 @@ def write(
     output_path: Union[Path, str],
     *,
     xyz_offset: Tuple[float] = (0, 0, 0),
-    point_format: int = None,
+    point_format: Optional[int] = None,
     scale: Tuple[float] = None,
     data_min_max: Optional[Dict[str, Tuple]] = None,
 ):
@@ -88,52 +88,43 @@ def write(
     if not xyz:
         raise ValueError("Could not find xyz coordinates from input data.")
 
-    header = laspy.header.Header(file_version=1.4, point_format=point_format)
+    las = pylas.create(file_version="1.4", point_format_id=point_format)
 
-    with laspy.file.File(str(output_path), mode="w", header=header) as f:
-        old_set_header_property = f.writer.set_header_property
+    for dim in extra_dimensions:
+        las.add_extra_dim(name=dim, type=str(point_data[dim].dtype))
 
-        def monkeypatched(self, *args, **kwargs):
-            """There is a bug in laspy where Writer.data_provider._mmap
+    min_, max_, offset = _min_max_offset(xyz)
+    min_ += xyz_offset
+    max_ += xyz_offset
+    offset = xyz_offset if xyz_offset else offset
+    las.header.mins, las.header.maxs, las.header.offsets = min_, max_, offset
+    las.header.scales = scale if scale else _get_scale(min_, max_, offset)
 
-            is not flushed before reading directly from the fileref."""
-            old_set_header_property(*args, **kwargs)
-            self.data_provider._mmap.flush()
+    las.x = xyz[0].astype("d") + xyz_offset[0]
+    las.y = xyz[1].astype("d") + xyz_offset[1]
+    las.z = xyz[2].astype("d") + xyz_offset[2]
 
-        f.writer.set_header_property = types.MethodType(monkeypatched, f.writer)
+    if "gps_time" in point_format_type and "gps_time" in point_data:
+        las.gps_time = point_data["gps_time"]
 
-        for dim in extra_dimensions:
-            f.define_new_dimension(dim, _guess_las_data_type(point_data[dim]), dim)
+    if "intensity" in point_format_type and "intensity" in point_data:
+        las.intensity = scale_data(
+            "intensity", point_data["intensity"], data_min_max.get("intensity")
+        )
 
-        min_, max_, offset = _min_max_offset(xyz)
-        min_ += xyz_offset
-        max_ += xyz_offset
-        offset = xyz_offset if xyz_offset else offset
-        f.header.min, f.header.max, f.header.offset = min_, max_, offset
-        f.header.scale = scale if scale else _get_scale(min_, max_, offset)
+    if "classification" in point_format_type and "classification" in point_data:
+        # convert pd.Series to numpy array, if applicable
+        las.classification = np.array(point_data["classification"])
 
-        f.x = xyz[0].astype("d") + xyz_offset[0]
-        f.y = xyz[1].astype("d") + xyz_offset[1]
-        f.z = xyz[2].astype("d") + xyz_offset[2]
+    colors = ["red", "green", "blue"]
+    if all(c in point_format_type and c in point_data for c in colors):
+        for c in colors:
+            setattr(las, c, scale_data(c, point_data[c], data_min_max.get(c)))
 
-        if "gps_time" in point_format_type and "gps_time" in point_data:
-            f.gps_time = point_data["gps_time"]
+    for dim in extra_dimensions:
+        setattr(las, dim, point_data[dim])
 
-        if "intensity" in point_format_type and "intensity" in point_data:
-            f.intensity = scale_data(
-                "intensity", point_data["intensity"], data_min_max.get("intensity")
-            )
-
-        if "classification" in point_format_type and "classification" in point_data:
-            f.classification = point_data["classification"]
-
-        colors = ["red", "green", "blue"]
-        if all(c in point_format_type and c in point_data for c in colors):
-            for c in colors:
-                setattr(f, c, scale_data(c, point_data[c], data_min_max.get(c)))
-
-        for dim in extra_dimensions:
-            setattr(f, dim, point_data[dim])
+    las.write(str(output_path))
 
 
 def scale_data(field_name, data, min_max):
@@ -162,7 +153,7 @@ def _min_max_offset(xyz: List[np.ndarray]) -> Tuple[Tuple[float]]:
 
 
 def _get_scale(minimums, maximums, offset) -> Tuple[float]:
-    max_long = np.iinfo(np.int32).max
+    max_long = np.iinfo(np.int32).max - 1
 
     offseted_max_ranges = np.max(
         [np.abs(minimums - offset), np.abs(maximums - offset)], axis=0
@@ -171,32 +162,3 @@ def _get_scale(minimums, maximums, offset) -> Tuple[float]:
     scale = offseted_max_ranges / max_long
 
     return tuple(scale)
-
-
-def _guess_las_data_type(data):
-    """For a given array, return its laspy data type"""
-
-    default = "float64"
-    las_data_types = [
-        "uint8",
-        "int8",
-        "uint16",
-        "int16",
-        "uint32",
-        "int32",
-        "uint64",
-        "int64",
-        "float32",
-        "float64",
-    ]
-    try:
-        type_ = str(data.dtype)
-    except AttributeError:
-        type_ = default
-
-    if type_ not in las_data_types:
-        raise NotImplementedError(
-            "Array type not implemented "
-            f"(most likely not implemented in the las specification): {type_}"
-        )
-    return las_data_types.index(type_) + 1
