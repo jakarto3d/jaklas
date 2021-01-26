@@ -11,7 +11,7 @@ def write(
     point_data,
     output_path: Union[Path, str],
     *,
-    xyz_offset: Tuple[float] = (0, 0, 0),
+    xyz_offset: Tuple[float] = None,
     point_format: Optional[int] = None,
     scale: Tuple[float] = None,
     data_min_max: Optional[Dict[str, Tuple]] = None,
@@ -94,9 +94,13 @@ def write(
         las.add_extra_dim(name=dim, type=f"{dtype.kind}{dtype.itemsize}")
 
     min_, max_, offset = _min_max_offset(xyz)
+
+    offset = offset if xyz_offset is None else xyz_offset
+    if xyz_offset is None:
+        xyz_offset = (0, 0, 0)
+
     min_ += xyz_offset
     max_ += xyz_offset
-    offset = xyz_offset if xyz_offset else offset
     las.header.mins, las.header.maxs, las.header.offsets = min_, max_, offset
     las.header.scales = scale if scale else _get_scale(min_, max_, offset)
 
@@ -155,10 +159,10 @@ def _min_max_offset(xyz: List[np.ndarray]) -> Tuple[Tuple[float]]:
 def _get_scale(minimums, maximums, offset) -> Tuple[float]:
     max_long = np.iinfo(np.int32).max - 1
 
-    offseted_max_ranges = np.max(
+    offsetted_max_ranges = np.max(
         [np.abs(minimums - offset), np.abs(maximums - offset)], axis=0
     )
 
-    scale = offseted_max_ranges / max_long
+    scale = offsetted_max_ranges / max_long
 
     return tuple(scale)

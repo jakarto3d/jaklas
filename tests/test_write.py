@@ -116,7 +116,22 @@ def test_write_offset(data):
 
 
 @pytest.mark.parametrize("data", [point_data, point_data_pandas])
-def test_write_offset_large_coordinates(data):
+def test_write_large_coordinates(data):
+    data = deepcopy(data)
+    data["x"] += 320000
+    data["y"] += 5000000
+    data["z"] -= 20
+    jaklas.write(data, TEMP_OUTPUT)
+    f = pylas.read(str(TEMP_OUTPUT))
+    assert np.allclose(f.x, data["x"], atol=0.0001)
+    assert np.allclose(f.y, data["y"], atol=0.0001)
+    assert np.allclose(f.z, data["z"], atol=0.0001)
+    assert np.allclose(f.intensity, data["intensity"].astype("u2"))
+    assert np.allclose(f.classification, data["classification"])
+
+
+@pytest.mark.parametrize("data", [point_data, point_data_pandas])
+def test_write_large_coordinates_xyz_offset(data):
     data = deepcopy(data)
     xyz_offset = (3e5, 5e6, 100)
     data["x"] = data["x"].astype("f")
