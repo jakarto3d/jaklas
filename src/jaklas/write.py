@@ -3,6 +3,8 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pylas
+import pyproj
+from pylas.vlrs.known import WktCoordinateSystemVlr
 
 from . import point_formats
 
@@ -11,6 +13,7 @@ def write(
     point_data,
     output_path: Union[Path, str],
     *,
+    crs: Optional[int] = None,
     xyz_offset: Tuple[float] = None,
     point_format: Optional[int] = None,
     scale: Tuple[float] = None,
@@ -31,6 +34,7 @@ def write(
             loaded as float32 with an offset.
             The offset is applied by adding it to the coordinate.
             Defaults to (0, 0, 0).
+        crs (int, optional): The EPSG code to write in the las header.
         point_format (int, optional): The las point format type identifier
             Only formats 0, 1, 2, 3, 6 and 7 are accepted.
             If None is given, the best point format will be guessed
@@ -88,6 +92,11 @@ def write(
         raise ValueError("Could not find xyz coordinates from input data.")
 
     las = pylas.create(file_version="1.4", point_format_id=point_format)
+
+    if crs is not None:
+        wkt = pyproj.CRS.from_epsg(crs).to_wkt()
+        las.vlrs.append(WktCoordinateSystemVlr(wkt))
+        las.header.global_encoding.wkt = 1
 
     for dim in extra_dimensions:
         dtype = point_data[dim].dtype

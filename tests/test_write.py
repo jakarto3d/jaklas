@@ -5,6 +5,7 @@ import jaklas
 import numpy as np
 import pandas as pd
 import pylas
+import pyproj
 import pytest
 
 TEMP_DIR = Path(__file__).parent / "temp"
@@ -264,3 +265,14 @@ def test_write_extra_dimensions_gps_time(data):
     assert np.allclose(f.new_stuff, data["new_stuff"])
     assert np.allclose(f.gps_time, data["gps_time"])
     assert f.new_stuff.dtype == np.dtype("u1")
+
+
+def test_write_crs():
+    jaklas.write(point_data_gps_time, TEMP_OUTPUT, crs=2950)
+    f = pylas.read(str(TEMP_OUTPUT))
+    # note: there is a bug in pylas (to be fixed)
+    # where WktCoordinateSystemVlr is read as WktMathTransformVlr
+    # wkt = f.vlrs.get("WktCoordinateSystemVlr")[0].string
+    wkt = f.vlrs[0].string
+    expected_wkt = pyproj.CRS.from_epsg(2950).to_wkt()
+    assert expected_wkt == wkt[:-1]  # null-terminated string in las file
