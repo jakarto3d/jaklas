@@ -12,14 +12,15 @@ correct field names.
 
 ## Installation
 ```bash
-git clone git@github.com:jakarto3d/jaklas.git
-cd jaklas
-python -m pip install .
+pip install jaklas
 ```
 
 ### Testing
 ```bash
+git clone git@github.com:jakarto3d/jaklas.git
+cd jaklas
 pip install -r requirements-dev.txt
+python -m pip install .
 pytest
 ```
 
