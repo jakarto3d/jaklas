@@ -20,6 +20,7 @@ setup(
     version=version,
     description="Point cloud writer to las file.",
     long_description=readme,
+    long_description_content_type="text/markdown",
     author="Arnaud Venet",
     author_email="arnaud.venet@jakarto.com",
     url="https://github.com/jakarto3d/jaklas",
