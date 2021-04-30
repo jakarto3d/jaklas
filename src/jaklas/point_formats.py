@@ -35,6 +35,7 @@ _base_format_6 = {
     "classification_flags": "u1",
     "scanner_channel": "u1",
     "scan_angle": "u2",
+    "overlap": "B",
 }
 point_formats = {
     0: {**_base_format_0},
