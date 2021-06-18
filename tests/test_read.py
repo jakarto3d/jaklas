@@ -40,7 +40,7 @@ def test_read_other_dims():
 
 
 def test_read_wrong_dim():
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         data = read(very_small_las, other_dims=["wrong"])
 
 

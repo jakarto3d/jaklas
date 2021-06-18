@@ -91,16 +91,18 @@ def write(
     if not xyz:
         raise ValueError("Could not find xyz coordinates from input data.")
 
-    las = laspy.create(file_version="1.4", point_format_id=point_format)
+    las = laspy.create(file_version="1.4", point_format=point_format)
 
     if crs is not None:
         wkt = pyproj.CRS.from_epsg(crs).to_wkt()
         las.vlrs.append(WktCoordinateSystemVlr(wkt))
         las.header.global_encoding.wkt = 1
 
-    for dim in extra_dimensions:
-        dtype = point_data[dim].dtype
-        las.add_extra_dim(name=dim, type=f"{dtype.kind}{dtype.itemsize}")
+    extra_bytes_params = [
+        laspy.point.format.ExtraBytesParams(name=dim, type=point_data[dim].dtype)
+        for dim in extra_dimensions
+    ]
+    las.add_extra_dims(extra_bytes_params)
 
     min_, max_, offset = _min_max_offset(xyz)
 

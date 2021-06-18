@@ -270,9 +270,6 @@ def test_write_extra_dimensions_gps_time(data):
 def test_write_crs():
     jaklas.write(point_data_gps_time, TEMP_OUTPUT, crs=2950)
     f = laspy.read(str(TEMP_OUTPUT))
-    # note: there is a bug in laspy (to be fixed)
-    # where WktCoordinateSystemVlr is read as WktMathTransformVlr
-    # wkt = f.vlrs.get("WktCoordinateSystemVlr")[0].string
-    wkt = f.vlrs[0].string
+    wkt = f.vlrs.get("WktCoordinateSystemVlr")[0].string
     expected_wkt = pyproj.CRS.from_epsg(2950).to_wkt()
-    assert expected_wkt == wkt[:-1]  # null-terminated string in las file
+    assert expected_wkt == wkt
