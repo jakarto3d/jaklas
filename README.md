@@ -1,3 +1,10 @@
+## Note:
+
+This library was originally created at Jakarto because we needed a single library to easily create las files
+from pandas arrays. We found using the old laspy api a bit unintuitive, so we created this wrapper.
+Since laspy 2.0.0, this has been greatly improved. Someone looking for the simplest way to read and write las files
+could find jaklas useful, but I would encourage reading laspy's documentation also.
+
 # jaklas
 
 jaklas is a thin wrapper around [`laspy`](https://github.com/laspy/laspy) to make reading and writing las files as
