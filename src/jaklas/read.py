@@ -1,6 +1,6 @@
 from typing import Dict
 
-import pylas
+import laspy
 import numpy as np
 
 from .header import Header
@@ -20,7 +20,7 @@ def read(
 
     data = {}
 
-    las = pylas.read(str(path))
+    las = laspy.read(str(path))
 
     x = (las.x - offset[0]).astype(xyz_dtype)
     y = (las.y - offset[1]).astype(xyz_dtype)
@@ -54,7 +54,7 @@ def read_header(path) -> Header:
     of las files, and you want to quickly scan bounding boxes.
 
     Should be roughly 50x faster than laspy,
-    and close to 10x than the master branch of pylas.
+    and close to 10x than the master branch of laspy.
     """
     with open(path, "rb") as f:
         return Header(f)

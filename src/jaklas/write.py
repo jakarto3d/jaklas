@@ -2,9 +2,9 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
-import pylas
+import laspy
 import pyproj
-from pylas.vlrs.known import WktCoordinateSystemVlr
+from laspy.vlrs.known import WktCoordinateSystemVlr
 
 from . import point_formats
 
@@ -91,7 +91,7 @@ def write(
     if not xyz:
         raise ValueError("Could not find xyz coordinates from input data.")
 
-    las = pylas.create(file_version="1.4", point_format_id=point_format)
+    las = laspy.create(file_version="1.4", point_format_id=point_format)
 
     if crs is not None:
         wkt = pyproj.CRS.from_epsg(crs).to_wkt()

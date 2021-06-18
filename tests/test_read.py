@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import numpy as np
-import pylas
+import laspy
 import pytest
 from jaklas import read, read_header, read_pandas, write
 
@@ -86,7 +86,7 @@ def test_read_all_fields():
 def test_read_offset():
     header = read_header(very_small_las)
 
-    with pylas.open(str(very_small_las)) as f:
+    with laspy.open(str(very_small_las)) as f:
         assert list(f.header.scales) == header.scale
         assert list(f.header.offsets) == header.offset
         assert list(f.header.mins) == header.min
