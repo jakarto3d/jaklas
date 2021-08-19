@@ -1,9 +1,9 @@
 from typing import List
 
 import numpy as np
-from pylas.point.dims import COMPOSED_FIELDS_6, POINT_FORMAT_DIMENSIONS
+from laspy.point.dims import COMPOSED_FIELDS_6, POINT_FORMAT_DIMENSIONS
 
-# pylas standard attributes depending on the point format
+# laspy standard attributes depending on the point format
 _base_format_0 = {
     "X": "i4",
     "Y": "i4",
