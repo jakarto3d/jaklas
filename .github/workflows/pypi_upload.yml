@@ -1,16 +1,12 @@
 name: pypi_upload
 
 on:
-  push:
-    tags:
-      - "*"
+  release:
+    types: [published]
 
 jobs:
   build:
     name: PyPI upload
-    # master should be replaced by main (https://github.com/github/renaming#why-main)
-    if: ${{ github.ref == 'refs/heads/master' }}
-
     runs-on: ubuntu-latest
 
     steps:
