@@ -112,8 +112,9 @@ def write(
 
     min_ += xyz_offset
     max_ += xyz_offset
-    las.header.mins, las.header.maxs, las.header.offsets = min_, max_, offset
-    las.header.scales = scale if scale else _get_scale(min_, max_, offset)
+    las.header.mins, las.header.maxs = min_, max_
+    scales = scale if scale else _get_scale(min_, max_, offset)
+    las.change_scaling(scales=scales, offsets=offset)
 
     las.x = xyz[0].astype("d") + xyz_offset[0]
     las.y = xyz[1].astype("d") + xyz_offset[1]
