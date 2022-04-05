@@ -39,8 +39,11 @@ def read(
         other_dims = set(las.point_format.dimension_names) - set("XYZ")
 
     for dim in other_dims:
-        if not ignore_missing_dims and not hasattr(las, dim):
-            raise KeyError(f"Dimension not found in file {dim}")
+        if not hasattr(las, dim):
+            if ignore_missing_dims:
+                continue
+            else:
+                raise KeyError(f"Las file {path} does not have dimension '{dim}'")
 
         data[dim] = getattr(las, dim)
 

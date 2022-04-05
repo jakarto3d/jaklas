@@ -91,3 +91,9 @@ def test_read_offset():
         assert list(f.header.offsets) == header.offset
         assert list(f.header.mins) == header.min
         assert list(f.header.maxs) == header.max
+
+def test_read_ignore_missing_dims():
+    data = read(very_small_las, other_dims=["intensity", "missing"], ignore_missing_dims=True)
+    assert len(data["xyz"]) == 71
+    assert "intensity" in data
+    assert "missing" not in data
