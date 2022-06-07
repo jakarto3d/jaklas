@@ -63,7 +63,7 @@ def read_header(path) -> Header:
         return Header(f)
 
 
-def read_pandas(path, *, offset=None, xyz_dtype="d", other_dims=None):
+def read_pandas(path, *, offset=None, xyz_dtype="d", other_dims=None, ignore_missing_dims=False):
     import pandas as pd
 
     return pd.DataFrame(
@@ -73,5 +73,6 @@ def read_pandas(path, *, offset=None, xyz_dtype="d", other_dims=None):
             combine_xyz=False,
             xyz_dtype=xyz_dtype,
             other_dims=other_dims,
+            ignore_missing_dims=ignore_missing_dims,
         )
     )
