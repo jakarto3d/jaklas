@@ -49,6 +49,7 @@ def test_read_pandas():
     assert len(df["x"]) == 71
     assert "x" in df and "y" in df and "z" in df
     assert "gps_time" in df and "intensity" in df
+    assert len(df.classification) == 71 and df.classification.dtype == "uint8"
 
 
 def test_read_dtype():
