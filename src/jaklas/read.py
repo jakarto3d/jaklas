@@ -66,13 +66,16 @@ def read_header(path) -> Header:
 def read_pandas(path, *, offset=None, xyz_dtype="d", other_dims=None, ignore_missing_dims=False):
     import pandas as pd
 
-    return pd.DataFrame(
-        read(
-            path,
-            offset=offset,
-            combine_xyz=False,
-            xyz_dtype=xyz_dtype,
-            other_dims=other_dims,
-            ignore_missing_dims=ignore_missing_dims,
-        )
+    data = read(
+        path,
+        offset=offset,
+        combine_xyz=False,
+        xyz_dtype=xyz_dtype,
+        other_dims=other_dims,
+        ignore_missing_dims=ignore_missing_dims,
     )
+
+    # laspy is reading some attributes as type object instead of array
+    data = {k: np.ascontiguousarray(v) for k, v in data.items()}
+
+    return pd.DataFrame(data)
