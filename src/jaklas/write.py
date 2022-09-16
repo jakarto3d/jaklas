@@ -169,7 +169,7 @@ def _min_max_offset(xyz: List[np.ndarray]) -> Tuple[Tuple[float]]:
 
 
 def _get_scale(minimums, maximums, offset) -> Tuple[float]:
-    max_long = np.iinfo(np.int32).max - 1
+    max_long = np.iinfo(np.int32).max - 8
 
     offsetted_max_ranges = np.max(
         [np.abs(minimums - offset), np.abs(maximums - offset)], axis=0
