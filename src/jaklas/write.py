@@ -63,7 +63,7 @@ def write(
     standard_dimensions = point_formats.standard_dimensions | {"xyz", "XYZ"}
     extra_dimensions = sorted(set(point_data) - standard_dimensions)
 
-    if not point_format:
+    if point_format is None:
         point_format = point_formats.best_point_format(point_data, extra_dimensions)
 
     if point_format not in point_formats.supported_point_formats:
